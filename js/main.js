@@ -1,55 +1,54 @@
 class Game {
-	_colors = ["BlueTile.png", "RedTile.png", "GreenTile.png", "PurpleTile.png", "YellowTile.png"];
-	_imgTiles;
+	_resources = {};
 	_loadPromise;
-	_canvas;
 
-	constructor(canvas) {
-		this._canvas = canvas;
+	constructor() {
 	}
-	loadResourses() {
+	loadResourses(resourcesPath) {
 		this._loadPromise = new Promise((resolve, reject) => {
-			this._imgTiles = new Array();
 			let flag = 0;
-			for (let i = 0; i < this._colors.length; i++) {
-				let img = new Image();
-				img.src = "img/" + this._colors[i];
-				img.onload = () => {
-					flag++;
-					if (flag == this._colors.length) {
-						resolve(flag);
-					}
-				}
-				this._imgTiles.push(img);
-			}
-		});
-	}
-	onlistener(elemDom) {
-		elemDom.addEventListener('mousemove', (event) => {
-			//console.log(event.offsetX + " " + event.offsetY);
+			for (let key in resourcesPath) {
+				if (key != "puthToResources") {
+					this._resources[key] = new Array();
+					for (let i = 0; i < resourcesPath[key].length; i++) {
+						let img = new Image();
+						img.src = resourcesPath["puthToResources"] + resourcesPath[key][i];
+						img.onload = () => {
+							flag++;
+							if (flag == resourcesPath["amountResources"]) {
+								resolve(flag);
+							}
+						}
+						this._resources[key].push(img);
+                    }
+                }
+            }
 		});
 	}
 }
 class Field{   
-	_amountTiles; 
-	_widthTile;
-	_widthField;     
-	_heightField;
+	_width;     
+	_height;
 	_X;
 	_Y;
-	_arrayTiles;
+	_amountTiles;
+	_img;
 	_game;
+	_arrayTiles;
+	_arrayTilesForDraw;
+	_widthTile;
 	_padding;
 	//Attr: width and height field in px,
 	//coordinators from a left up corner in px,
 	//amount tiles, context of parrent
-	constructor(widthField = 0, heightField = 0, X = 0, Y = 0, amountTiles = 0, game = null) {
+	constructor(widthField = 0, heightField = 0, X = 0, Y = 0, amountTiles = 0, img = null, game = null) {
 		this._game = game;
-		this._widthField = widthField;
-		this._heightField = heightField;
+		this._width = widthField;
+		this._height = heightField;
 		this._X = X;
 		this._Y = Y;
 		this._amountTiles = amountTiles;
+		this._img = img;
 		this._arrayTiles = new Array();
 		let widthTile = Math.sqrt(widthField * heightField / amountTiles);
 		let amountInWidth = Math.round(widthField / widthTile);
@@ -64,11 +63,29 @@ class Field{
 			this._arrayTiles[i] = arr;
 		}
 	}
-	fillTiles(amountColors){
-		
+	//This methid create tiles for field
+	craeteTiles(amountColors) {
+		this._arrayTilesForDraw = new Array();
+		let widthTile = this._widthTile;
+		let heightTile = this._widthTile;
+		let minSide = this._widthField < this._heightField ? "width" : "height";
+		let marginX = this._padding / 2;
+		let marginY = this._padding / 2;
+		if (this._widthField != this._heightField) {
+			if (minSide == "width") {
+				marginX = (this._widthField / this._heightField) * marginX;
+			} else {
+				marginY = (this._heightField / this._widthField) * marginY;
+			}
+		}
 		for(let i=0; i<this._arrayTiles.length; i++){
-			for(let k=0; k<this._arrayTiles[i].length; k++){
-				this._arrayTiles[i][k] = new Tile(i+" "+k,randomInteger(0,amountColors-1));
+			for (let k = 0; k < this._arrayTiles[i].length; k++){
+				let colorNumber = randomInteger(0, amountColors - 1);
+				let img = this._game._resources.imgTile[colorNumber];
+				let x = this._X + i * this._widthTile + marginX;
+				let y = this._Y + k * this._widthTile + marginY;
+				this._arrayTiles[i][k] = new Tile(widthTile, heightTile, x, y, img, i + " " + k, colorNumber);
+				this._arrayTilesForDraw.push(this._arrayTiles[i][k]);
 			}
 		}
 		for(let i=0; i<this._arrayTiles.length; i++){
@@ -90,13 +107,23 @@ class Field{
 	}
 }
 class Tile{
+	_width;
+	_height;
+	_X;
+	_Y;
+	_img;
 	_id;
 	_color;
 	_leftTile;
 	_upTile;
 	_rightTile;
 	_bottomTile;
-	constructor(id = -1, color = 1, leftTile = null, upTile = null, rightTile = null, bottomTile = null) {
+	constructor(width = 0, height = 0, X = 0, Y = 0, img = null, id = -1, color = 1, leftTile = null, upTile = null, rightTile = null, bottomTile = null) {
+		this._width = width;
+		this._height = height;
+		this._X = X;
+		this._Y = Y;
+		this._img = img;
 		this._id = id;
 		this._color = color;
 		this._leftTile = leftTile;
@@ -106,39 +133,14 @@ class Tile{
 	}
 }
 class Rendering {
-
-	drawField(field, imgPath, ctxCanvas) {
-		let width = field._widthField;
-		let height = field._heightField;
-		let img = new Image();
-		img.src = imgPath;
-		img.onload = () => {
-			img.width = width;
-			img.height = height;
-			ctxCanvas.drawImage(img, field._X, field._Y, width, height);
-		}
+	drawImg(object, ctxCanvas) {
+		ctxCanvas.drawImage(object._img, object._X, object._Y, object._width, object._height);
 	}
-	drawTiles(field,imgTailes,ctxCanvas) {
-		let width = field._widthTile;
-		let height = field._widthTile;
-		let minSide = field._widthField < field._heightField ? "width" : "height";
-		let marginX = field._padding / 2;
-		let marginY = field._padding / 2;
-		if (field._widthField != field._heightField) {
-			if (minSide == "width") {
-				marginX = (field._widthField / field._heightField) * marginX;
-			} else {
-				marginY = (field._heightField / field._widthField) * marginY;
-			}
-		}
-		for (let i = 0; i < field._arrayTiles.length; i++) {
-			for (let k = 0; k < field._arrayTiles[i].length; k++) {
-				let colorNumber = field._arrayTiles[i][k]._color;
-				let img = imgTailes[colorNumber];
-				let x = field._X + i * field._widthTile + marginX;
-				let y = field._Y + k * field._widthTile + marginY;
-				ctxCanvas.drawImage(img, x, y, width, height);
-			}
-		}
+	drawAll(arrayObjects, ctxCanvas, delay = 0) {
+		for (let i = 0; i < arrayObjects.length; i++) {
+			setTimeout(() => {
+				ctxCanvas.drawImage(arrayObjects[i]._img, arrayObjects[i]._X, arrayObjects[i]._Y, arrayObjects[i]._width, arrayObjects[i]._height);
+			}, delay*i);
+        }
 	}
 }
