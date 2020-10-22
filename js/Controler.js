@@ -1,22 +1,30 @@
 class Controller {
     _game;
-    constructor(game) {
+	_ctxCanvas;
+    objectRegister = {};
+    constructor(game, objectRegister, ctxCanvas) {
         this._game = game;
+        this.objectRegister = objectRegister;
+		this._ctxCanvas = ctxCanvas;
+		console.log(this);
     }
-    begin(ctxCanvas) {
+    begin() {
         document.addEventListener('click', (event) => {
             let mouseX = event.offsetX;
             let mouseY = event.offsetY;
-            for (let key in this._game._objects) {
-                for (let i = 0; i < this._game._objects[key].length; i++) {
-                    let x = this._game._objects[key][i]._X;
-                    let y = this._game._objects[key][i]._Y;
-                    let width = this._game._objects[key][i]._width;
-                    let height = this._game._objects[key][i]._height;
+            for (let key in this.objectRegister) {
+                for (let i = 0; i < this.objectRegister[key].length; i++) {
+					if(this.objectRegister[key][i]==null){
+						continue;
+					}
+                    let x = this.objectRegister[key][i].X;
+                    let y = this.objectRegister[key][i].Y;
+                    let width = this.objectRegister[key][i].width;
+                    let height = this.objectRegister[key][i].height;
                     let path2D = new Path2D();
                     path2D.rect(x, y, width, height);
-                    if (ctxCanvas.isPointInPath(path2D, mouseX, mouseY)) {
-                        this.targetObjectForClick(this._game._objects[key][i]);
+                    if (this._ctxCanvas.isPointInPath(path2D, mouseX, mouseY)) {
+                        this.targetObjectForClick(this.objectRegister[key][i]);
                     }
                 }
             }
@@ -25,46 +33,48 @@ class Controller {
     targetObjectForClick(object) {
 		//This function for check target object for available actions
         if (object instanceof Tile) {
-            console.log(this.amountTilesWithSameColor(object));
+			//Call the facade of the Game class
+            this._game.facade({
+				"clickOnTile":this.getArrayTilesWithSameColor(object)
+			});
         }
     }
-	amountTilesWithSameColor(tile){
-		//This function count amount tiles with same color located of the near
-		//amountTilesWithSameColorRec use for recursive call
-		//Next, call tile._field.linkTiles() for set isCounted to false
-		let amount = this.amountTilesWithSameColorRec(tile);
+	getArrayTilesWithSameColor(tile){
+		/*
+		The recursive method is based on the "raised hand" principle.
+		When a method is called for a neighboring tile of similar color,
+		it puts itself in the array and "lowers its hand".
+		*/
+		let arrayTiles = new Array();
+		this.getArrayTilesWithSameColorRec(tile,arrayTiles);
 		tile._field.linkTiles();
-		return amount;
+		return arrayTiles;
 	}
-    amountTilesWithSameColorRec(tile) {
-		tile._isCounted = true;
+    getArrayTilesWithSameColorRec(tile,arrayTiles) {
+		tile.isCounted = true;
+		arrayTiles.push(tile);
         let idColor = tile._color;
-        let amountTilesForBlast = 0;
-        if (tile._leftTile != null&&tile._leftTile._isCounted==false) {
-            if (idColor == tile._leftTile._color) {
-                amountTilesForBlast++;
-                amountTilesForBlast += this.amountTilesWithSameColorRec(tile._leftTile);
+        if (tile.leftTile != null&&tile.leftTile.isCounted==false) {
+            if (idColor == tile.leftTile._color) {
+                this.getArrayTilesWithSameColorRec(tile.leftTile,arrayTiles);
             }
         }
-        if (tile._upTile != null&&tile._upTile._isCounted==false) {
-            if (idColor == tile._upTile._color) {
-                amountTilesForBlast++;
-                amountTilesForBlast += this.amountTilesWithSameColorRec(tile._upTile);
+        if (tile.upTile != null&&tile.upTile.isCounted==false) {
+            if (idColor == tile.upTile._color) {
+                this.getArrayTilesWithSameColorRec(tile.upTile,arrayTiles);
             }
         }
-        if (tile._rightTile != null&&tile._rightTile._isCounted==false) {
-            if (idColor == tile._rightTile._color) {
-                amountTilesForBlast++;
-                amountTilesForBlast += this.amountTilesWithSameColorRec(tile._rightTile);
+        if (tile.rightTile != null&&tile.rightTile.isCounted==false) {
+            if (idColor == tile.rightTile._color) {
+                this.getArrayTilesWithSameColorRec(tile.rightTile,arrayTiles);
             }
         }
-        if (tile._bottomTile != null&&tile._bottomTile._isCounted==false) {
-            if (idColor == tile._bottomTile._color) {
-                amountTilesForBlast++;
-                amountTilesForBlast += this.amountTilesWithSameColorRec(tile._bottomTile);
+        if (tile.bottomTile != null&&tile.bottomTile.isCounted==false) {
+            if (idColor == tile.bottomTile._color) {
+                this.getArrayTilesWithSameColorRec(tile.bottomTile,arrayTiles);
             }
         }
 
-        return amountTilesForBlast;
+        return arrayTiles;
     }
 }
