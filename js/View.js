@@ -86,12 +86,12 @@ class View{
 		tile.Y = yField+(tile.height*tile.row)+heightField*0.05;
 		this.drawImage(tile);
 	}
-	drawAllTiles(tiles,delay=0){
-		for(let i=0; i<tiles.length; i++){
-			if(tiles[i]!=null){
-				setTimeout(()=>{
+	drawAllTiles(tiles, delay = 0) {
+		for (let i = 0; i < tiles.length; i++){
+			if (tiles[i] != null) {
+				setTimeout(() => {
 					this.drawTile(tiles[i]);
-				},delay*i);
+				}, delay * i);
 			}
 		}
 	}

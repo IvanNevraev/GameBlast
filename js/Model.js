@@ -14,6 +14,8 @@ class Game {
 	constructor(view, objectRegister) {
 		this._view = view;
 		this.objectRegister = objectRegister;
+		this.objectRegister.Field = new Array();
+		this.objectRegister.Tile = new Array();
 		console.log(this);
 	}
 	begin() {
@@ -24,16 +26,10 @@ class Game {
 		//Create new field
 		let field = new Field(this.amountTilesInWidth, this.amountTilesInHeight);
 		//Add it into  register
-		this.objectRegister.Field = new Array(field);
+		this.objectRegister.Field.push(field);
 		//Call field`s method for create new tiles
-		field.craeteTiles(this.amountWariablesColors);
-		this.objectRegister.Tile = new Array();
 		//Add these tiles into register
-		for (let i = 0; i < field._matrixOfTiles.length; i++) {
-			for (let k = 0; k < field._matrixOfTiles[i].length; k++) {
-				this.objectRegister.Tile.push(field._matrixOfTiles[i][k]);
-			}
-		}
+		matrixToLineArray(field.craeteTiles(this.amountWariablesColors), this.objectRegister.Tile);
 		//Call field`s method for link tiles each other
 		field.linkTiles();
     }
@@ -52,21 +48,14 @@ class Game {
 		console.log("Start Game.blastTiles()");
 		for(let i=0; i<arrayTiles.length; i++){
 			let index = this.objectRegister.Tile.indexOf(arrayTiles[i]);
-			delete this.objectRegister.Tile[index];
+			this.objectRegister.Tile[index] = null;
 		}
+		//Remove tiles from field`s matrix
+		this.objectRegister.Field[0].deleteTiles(arrayTiles);
 		this._view.draw();
-		//Remove blaasted tiles from field`s matrix
-		/*let field = this.objectRegister.Field[0];
-		for (let i = 0; i < field._matrixOfTiles.length; i++) {
-			for (let k = 0; k < field._matrixOfTiles[i].length; k++) {
-				let index = this.objectRegister.Tile.indexOf(field._matrixOfTiles[i][k]);
-				if(index==-1){
-					field._matrixOfTiles[i][k] = null;
-				}
-			}
-		}*/
-		//Now, the field moves its tiles down to the vacant ones
-		this.objectRegister.Field[0].moveTiles();
+		//Move tailes to vacant places
+		matrixToLineArray(this.objectRegister.Field[0].fallTiles(), this.objectRegister.Tile);
+		this._view.draw();
 	}
 }
 class Obj {
@@ -103,6 +92,7 @@ class Field extends Obj{
 				this._matrixOfTiles[i][k] = new Tile(i + " " + k, colorNumber,this,i,k);
 			}
 		}
+		return this._matrixOfTiles;
 	}
 	linkTiles() {
 		//This method adds for each tile links to adjacent tiles
@@ -124,9 +114,39 @@ class Field extends Obj{
 			}
 		}
 	}
-	moveTiles(){
+	deleteTiles(tiles) {
+		console.log("Start Field.deleteTiles");
+		//This method delete tiles from _matrixOfTiles
+		for (let i = 0; i < this._matrixOfTiles.length; i++) {
+			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+				if (tiles.indexOf(this._matrixOfTiles[i][k]) != -1) {
+					this._matrixOfTiles[i][k] = null;
+                }
+				
+			}
+		}
+    }
+	fallTiles(){
 		console.log("Start Field.moveTiles()");
-		console.log(this._matrixOfTiles);
+		let y;
+		for (let i = this._matrixOfTiles.length-2; i >=0; i--) {
+			for (let k = this._matrixOfTiles[i].length - 1; k >= 0; k--) {
+				y = i;
+				if (this._matrixOfTiles[y + 1][k] == null && this._matrixOfTiles[y][k]!=null) {
+					while (this._matrixOfTiles[y + 1][k] == null) {
+						this._matrixOfTiles[y][k].row = y + 1;
+						this._matrixOfTiles[y + 1][k] = this._matrixOfTiles[y][k];
+						this._matrixOfTiles[y][k] = null;
+						if ((y + 1) < this._matrixOfTiles.length-1) {
+							y++;
+						} else {
+							break;
+                        }
+                    }
+                }
+			}
+		}
+		return this._matrixOfTiles;
 	}
 }
 class Tile extends Obj{
