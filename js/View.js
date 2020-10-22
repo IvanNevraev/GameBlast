@@ -37,7 +37,8 @@ class View{
 		});
 	}
 	draw() {
-		this._loadPromise.then((result)=>{
+		this._loadPromise.then((result) => {
+			console.log("Start View.draw()");
 			this.drawField(this.objectRegister.Field[0],1);
 			this.drawAllTiles(this.objectRegister.Tile,0);
 		},(reject)=>{});

@@ -39,7 +39,8 @@ class Controller {
 			});
         }
     }
-	getArrayTilesWithSameColor(tile){
+    getArrayTilesWithSameColor(tile) {
+        console.log("Start Controler.getArrayTilesWithSameColor()");
 		/*
 		The recursive method is based on the "raised hand" principle.
 		When a method is called for a neighboring tile of similar color,

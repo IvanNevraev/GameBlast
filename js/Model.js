@@ -28,7 +28,7 @@ class Game {
 		//Add it into  register
 		this.objectRegister.Field.push(field);
 		//Call field`s method for create new tiles
-		//Add these tiles into register
+		//Link these tiles with register
 		matrixToLineArray(field.craeteTiles(this.amountWariablesColors), this.objectRegister.Tile);
 		//Call field`s method for link tiles each other
 		field.linkTiles();
@@ -52,9 +52,11 @@ class Game {
 		}
 		//Remove tiles from field`s matrix
 		this.objectRegister.Field[0].deleteTiles(arrayTiles);
-		this._view.draw();
 		//Move tailes to vacant places
-		matrixToLineArray(this.objectRegister.Field[0].fallTiles(), this.objectRegister.Tile);
+		this.objectRegister.Field[0].fallTiles();
+		//Add tailes for empty cell
+		let matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
+		matrixToLineArray(matrix, this.objectRegister.Tile);
 		this._view.draw();
 	}
 }
@@ -98,6 +100,9 @@ class Field extends Obj{
 		//This method adds for each tile links to adjacent tiles
 		for (let i = 0; i < this._matrixOfTiles.length; i++){
 			for (let k = 0; k < this._matrixOfTiles[i].length; k++){
+				if (this._matrixOfTiles[i][k] == null) {
+					continue;
+                }
 				this._matrixOfTiles[i][k].isCounted = false;
 				if(k-1>=0){
 					this._matrixOfTiles[i][k].leftTile = this._matrixOfTiles[i][k-1];
@@ -126,7 +131,8 @@ class Field extends Obj{
 			}
 		}
     }
-	fallTiles(){
+	fallTiles() {
+		//This method moves the tile downward until there is an empty space. The loop starts iterating from the bottom.
 		console.log("Start Field.moveTiles()");
 		let y;
 		for (let i = this._matrixOfTiles.length-2; i >=0; i--) {
@@ -148,6 +154,20 @@ class Field extends Obj{
 		}
 		return this._matrixOfTiles;
 	}
+	addTiles(amountColors = 1) {
+		//This method add tiles for empty cell
+		console.log("Start Field.addTiles()");
+		for (let i = 0; i < this._matrixOfTiles.length; i++) {
+			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+				if (this._matrixOfTiles[i][k] == null) {
+					let colorNumber = randomInteger(0, amountColors - 1);
+					this._matrixOfTiles[i][k] = new Tile(i + " " + k, colorNumber,this,i,k);
+                }
+			}
+		}
+		this.linkTiles();
+		return this._matrixOfTiles;
+    }
 }
 class Tile extends Obj{
 	_id;
