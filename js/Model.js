@@ -16,12 +16,12 @@ class Game {
 		this.objectRegister = objectRegister;
 		this.objectRegister.Field = new Array();
 		this.objectRegister.Tile = new Array();
-		this.objectRegister.Stage = "startPlay";
 		console.log(this);
 	}
-	begin() {
+	buildeLevel() {
+		console.log("Start Model.buildeLevel()");
 		this.createNewField();
-		this._view.draw();
+		this._view.facade({"buildeLevel":[]});
 	}
 	createNewField() {
 		//Create new field
@@ -55,17 +55,19 @@ class Game {
 		}
 		//Remove tiles from field`s matrix
 		this.objectRegister.Field[0].deleteTiles(arrayTiles);
-		//--------------------------
 		this._view.facade({
 			"blastTiles" : arrayTiles
 		});
-		//------------------------
 		//Move tailes to vacant places
-		//this.objectRegister.Field[0].fallTiles();
+		let matrix = this.objectRegister.Field[0].fallTiles();
+		let array = new Array();
+		matrixToLineArray(matrix, array);
+		this._view.facade({
+			"fallTiles": array,
+		});
 		//Add tailes for empty cell
-		//let matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
-		//matrixToLineArray(matrix, this.objectRegister.Tile);
-		//this._view.draw();
+		matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
+		matrixToLineArray(matrix, this.objectRegister.Tile);
 	}
 }
 class Obj {

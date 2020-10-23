@@ -38,13 +38,13 @@ class View{
 			}
 		});
 	}
-	draw() {
-		this._loadPromise.then((result) => {
-			console.log("Start View.draw()");
-			this.drawField(this.objectRegister.Field[0], 1);
-			this.drawAllTiles(this.objectRegister.Tile, 0);
+	buildeLevel() {
+		console.log("Start View.buildeLevel()");
+		this.drawField(this.objectRegister.Field[0], 1);
+		this.drawAllTiles(this.objectRegister.Tile, 50);
+		this._drawPromise.then((resolve) => {
 			this.saveState();
-		},(reject)=>{});
+		});
     }
 	drawField(field,Z){
 		//Set phisical parametrs and draw
@@ -91,13 +91,23 @@ class View{
 		this.drawImage(tile);
 	}
 	drawAllTiles(tiles, delay = 0) {
-		for (let i = 0; i < tiles.length; i++){
-			if (tiles[i] != null) {
-				setTimeout(() => {
-					this.drawTile(tiles[i]);
-				}, delay * i);
+		console.log("Start View.drawAllTiles()");
+		let k = 0;
+		let kd = 0;
+		this._drawPromise = new Promise((resolve, reject) => {
+			for (let i = 0; i < tiles.length; i++) {
+				if (tiles[i] != null) {
+					setTimeout(() => {
+						this.drawTile(tiles[i]);
+						kd++;
+						if (kd == k) {
+							resolve("Finish View.drawAllTiles()");
+                        }
+					}, delay * i);
+					k++;
+				}
 			}
-		}
+		});
 	}
 	drawImage(object) {
 		this._ctxCanvas.drawImage(object.img, object.X, object.Y, object.width, object.height);
@@ -105,23 +115,56 @@ class View{
 	facade(object){
 		//Any requests from the model come here
 		//{"What will we do" : arrayOfChangetObjects}
-		for(let key in object){
-			if(key=="blastTiles"){
-				this.blastTiles(object[key]);
+		Promise.all([this._loadPromise, this._drawPromise]).then((value) => {
+			for (let key in object) {
+				if (key == "blastTiles") {
+					this.blastTiles(object[key]);
+				} else if (key == "buildeLevel") {
+					this.buildeLevel();
+				} else if (key == "fallTiles") {
+					this.fallTiles(object[key]);
+                }
 			}
-		}
+		}, (reason) => { });
 	}
 	saveState(){
 		//This method save previous states of objects
+		console.log("Start View.saveState()");
 		for(let key in this.objectRegister){
 			let currentArray = this.objectRegister[key];
 			let newArray = new Array();
-			for(let i=0; i<currentArray.length; i++){
-				newArray[i] = currentArray[i];
+			for (let i = 0; i < currentArray.length; i++){
+				let o;
+				if (currentArray[i] instanceof Tile) {
+					o = new Tile();
+				} else if (currentArray[i] instanceof Field) {
+					o = new Field();
+                }
+				newArray[i] = o;
+				for (let k in currentArray[i]) {
+					o[k] = currentArray[i][k];
+				}
+				o["proto"] = currentArray[i];
 			}
 			this.preState[key] = newArray;
 		}
 	}
+	findProto(object) {
+		//This method searches for the object based on which the copy was created
+		for (let key in this.preState) {
+			if (this.preState[key] instanceof Array) {
+				for (let item of this.preState[key]) {
+					if (item == null) {
+						continue;
+                    }
+					if (item.proto == object) {
+						return item;
+                    }
+                }
+            }
+		}
+		return null;
+    }
 	blastTiles(array) {
 		console.log("Start View.blastTiles()");
 		let k = 0;
@@ -131,7 +174,7 @@ class View{
 			for(let item of array){
 				setTimeout(()=>{
 					this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
-					let i = this.preState.Tile.indexOf(item);
+					let i = this.preState.Tile.indexOf(this.findProto(item));
 					this.preState.Tile[i] = null;
 					for(let tile of this.preState.Tile){
 						if(tile==null){
@@ -141,14 +184,62 @@ class View{
 					}
 					kd++;
 					if(kd==k){
-						resolve("finish");
+						resolve("Finish View.blastTiles()");
 					}
 				},delay*k);
 				k++;
 			}
 		});
-		this._drawPromise.then((resolve)=>{
+	}
+	fallTiles(array) {
+		console.log("Start View.fallTiles()");
+		let tileForFall = new Array();
+		let tileForStay = new Array();
+		for (let item of array) {
+			if (item == null) {
+				continue;
+            }
+			let copyTile = this.findProto(item);
+			if (copyTile.row != item.row) {
+				let newY = copyTile.Y + (item.row - copyTile.row) * copyTile.height;
+				tileForFall.push({
+					"copyTile": copyTile,
+					"startRow": copyTile.row,
+					"finishRow": item.row,
+					"startY": copyTile.Y,
+					"finishY": newY
+				});
+			} else {
+				tileForStay.push(copyTile);
+            }
+		}
+		let k = 0;
+		let kd = 0;
+		let delay = 5;
+		let cadrs = 50;
+		this._drawPromise.then((resolve) => {
 			console.log(resolve);
-		},(reject)=>{});
+			this._drawPromise = new Promise((resolve, reject) => {
+				for (let i = 0; i < cadrs; i++) {
+					setTimeout(() => {
+						this.drawField(this.preState.Field[0]);
+						for (let item of tileForStay) {
+							this.drawImage(item);
+                        }
+						for (let item of tileForFall) {
+							let deltaY = (item.finishY - item.startY) / cadrs;
+							item.copyTile.Y = item.copyTile.Y + deltaY;
+							this.drawImage(item.copyTile);
+						}
+						kd++;
+						if (kd == k) {
+							resolve("Finish View.fallTiles()");
+                        }
+					}, delay * i);
+					k++;
+				}
+			});
+		});
+		console.log(tileForFall);
     }
 }

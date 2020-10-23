@@ -18,6 +18,6 @@ function main() {
 	let view = new View(objectRegister, ctxCanvas, nameOfImages);
 	let game = new Game(view, objectRegister);
 	let controler = new Controller(game, objectRegister,ctxCanvas);
-	game.begin();
+	game.buildeLevel();
 	controler.begin();
 }
