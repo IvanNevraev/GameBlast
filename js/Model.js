@@ -68,6 +68,9 @@ class Game {
 		//Add tailes for empty cell
 		matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
 		matrixToLineArray(matrix, this.objectRegister.Tile);
+		this._view.facade({
+			"addTiles": this.objectRegister.Tile
+		});
 	}
 }
 class Obj {

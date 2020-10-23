@@ -15,6 +15,9 @@ class View{
 		this._ctxCanvas = ctxCanvas;
 		this._nameOfImages = nameOfImages;
 		this.loadResourses();
+		this._drawPromise = new Promise((resolve, reject) => {
+			resolve("This is first promise.");
+		});
 		console.log(this);
 	}
 	loadResourses() {
@@ -29,7 +32,7 @@ class View{
 						img.onload = () => {
 							flag++;
 							if (flag == this._nameOfImages["amountOfFiles"]) {
-								resolve(flag);
+								resolve("All images is downloaded. Amount:"+flag);
 							}
 						}
 						this._images[key].push(img);
@@ -94,20 +97,24 @@ class View{
 		console.log("Start View.drawAllTiles()");
 		let k = 0;
 		let kd = 0;
-		this._drawPromise = new Promise((resolve, reject) => {
-			for (let i = 0; i < tiles.length; i++) {
-				if (tiles[i] != null) {
-					setTimeout(() => {
-						this.drawTile(tiles[i]);
-						kd++;
-						if (kd == k) {
-							resolve("Finish View.drawAllTiles()");
-                        }
-					}, delay * i);
-					k++;
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				for (let i = 0; i < tiles.length; i++) {
+					if (tiles[i] != null) {
+						setTimeout(() => {
+							this.drawTile(tiles[i]);
+							kd++;
+							if (kd == k) {
+								resolve("Finish View.drawAllTiles()");
+							}
+						}, delay * i);
+						k++;
+					}
 				}
-			}
+			});
 		});
+		this._drawPromise = newPromise;
 	}
 	drawImage(object) {
 		this._ctxCanvas.drawImage(object.img, object.X, object.Y, object.width, object.height);
@@ -115,7 +122,7 @@ class View{
 	facade(object){
 		//Any requests from the model come here
 		//{"What will we do" : arrayOfChangetObjects}
-		Promise.all([this._loadPromise, this._drawPromise]).then((value) => {
+		this._loadPromise.then((resolve) => {
 			for (let key in object) {
 				if (key == "blastTiles") {
 					this.blastTiles(object[key]);
@@ -123,9 +130,11 @@ class View{
 					this.buildeLevel();
 				} else if (key == "fallTiles") {
 					this.fallTiles(object[key]);
+				} else if (key == "addTiles") {
+					this.addTiles(object[key]);
                 }
 			}
-		}, (reason) => { });
+		}, (reject) => { });
 	}
 	saveState(){
 		//This method save previous states of objects
@@ -166,60 +175,64 @@ class View{
 		return null;
     }
 	blastTiles(array) {
-		console.log("Start View.blastTiles()");
 		let k = 0;
 		let kd = 0;
 		let delay = 50;
-		this._drawPromise = new Promise((resolve,reject)=>{
-			for(let item of array){
-				setTimeout(()=>{
-					this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
-					let i = this.preState.Tile.indexOf(this.findProto(item));
-					this.preState.Tile[i] = null;
-					for(let tile of this.preState.Tile){
-						if(tile==null){
-							continue;
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				console.log("Start View.blastTiles()");
+				for (let item of array) {
+					setTimeout(() => {
+						this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
+						let i = this.preState.Tile.indexOf(this.findProto(item));
+						this.preState.Tile[i] = null;
+						for (let tile of this.preState.Tile) {
+							if (tile == null) {
+								continue;
+							}
+							this.drawTile(tile);
 						}
-						this.drawTile(tile);
-					}
-					kd++;
-					if(kd==k){
-						resolve("Finish View.blastTiles()");
-					}
-				},delay*k);
-				k++;
-			}
+						kd++;
+						if (kd == k) {
+							resolve("Finish View.blastTiles()");
+						}
+					}, delay * k);
+					k++;
+				}
+			});
 		});
+		this._drawPromise = newPromise;
 	}
 	fallTiles(array) {
-		console.log("Start View.fallTiles()");
-		let tileForFall = new Array();
-		let tileForStay = new Array();
-		for (let item of array) {
-			if (item == null) {
-				continue;
-            }
-			let copyTile = this.findProto(item);
-			if (copyTile.row != item.row) {
-				let newY = copyTile.Y + (item.row - copyTile.row) * copyTile.height;
-				tileForFall.push({
-					"copyTile": copyTile,
-					"startRow": copyTile.row,
-					"finishRow": item.row,
-					"startY": copyTile.Y,
-					"finishY": newY
-				});
-			} else {
-				tileForStay.push(copyTile);
-            }
-		}
 		let k = 0;
 		let kd = 0;
 		let delay = 5;
 		let cadrs = 50;
-		this._drawPromise.then((resolve) => {
+		let newPromise = this._drawPromise.then((resolve) => {
 			console.log(resolve);
-			this._drawPromise = new Promise((resolve, reject) => {
+			return new Promise((resolve, reject) => {
+				console.log("Start View.fallTiles()");
+				let tileForFall = new Array();
+				let tileForStay = new Array();
+				for (let item of array) {
+					if (item == null) {
+						continue;
+					}
+					let copyTile = this.findProto(item);
+					if (copyTile.row != item.row) {
+						let newY = copyTile.Y + (item.row - copyTile.row) * copyTile.height;
+						tileForFall.push({
+							"copyTile": copyTile,
+							"startRow": copyTile.row,
+							"finishRow": item.row,
+							"startY": copyTile.Y,
+							"finishY": newY
+						});
+					} else {
+						tileForStay.push(copyTile);
+					}
+				}
 				for (let i = 0; i < cadrs; i++) {
 					setTimeout(() => {
 						this.drawField(this.preState.Field[0]);
@@ -240,6 +253,43 @@ class View{
 				}
 			});
 		});
-		console.log(tileForFall);
+		this._drawPromise = newPromise;
+	}
+	addTiles(array) {
+		let k = 0;
+		let kd = 0;
+		let delay = 50;
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				console.log("Start View.addTiles()");
+				let tilesForAdded = new Array();
+				let tilesForStay = new Array();
+				for (let item of array) {
+					//No new tiles is this.preState, mean, we should add it
+					if (this.findProto(item) == null) {
+						tilesForAdded.push(item);
+					} else {
+						tilesForStay.push(item);
+					}
+				}
+				for (let item of tilesForAdded) {
+					setTimeout(() => {
+						this.drawField(this.preState.Field[0]);
+						for (let i of tilesForStay) {
+							this.drawTile(i);
+						}
+						this.drawTile(item);
+						tilesForStay.push(item);
+						kd++;
+						if (kd == k) {
+							resolve("Finish View.addTiles()");
+						}
+					}, delay * k);
+					k++;
+				}
+			});
+		});
+		this._drawPromise = newPromise;
     }
 }
