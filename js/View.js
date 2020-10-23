@@ -5,9 +5,11 @@ class View{
 	 */
 	_ctxCanvas;
 	_loadPromise; //This promise ensures that all resources are loaded
+	_drawPromise; //this promise controls the render queue
 	_nameOfImages;
 	_images = {};
 	objectRegister = {};
+	preState = {};
 	constructor(objectRegister, ctxCanvas, nameOfImages) {
 		this.objectRegister = objectRegister;
 		this._ctxCanvas = ctxCanvas;
@@ -39,8 +41,9 @@ class View{
 	draw() {
 		this._loadPromise.then((result) => {
 			console.log("Start View.draw()");
-			this.drawField(this.objectRegister.Field[0],1);
-			this.drawAllTiles(this.objectRegister.Tile,0);
+			this.drawField(this.objectRegister.Field[0], 1);
+			this.drawAllTiles(this.objectRegister.Tile, 0);
+			this.saveState();
 		},(reject)=>{});
     }
 	drawField(field,Z){
@@ -99,4 +102,53 @@ class View{
 	drawImage(object) {
 		this._ctxCanvas.drawImage(object.img, object.X, object.Y, object.width, object.height);
 	}
+	facade(object){
+		//Any requests from the model come here
+		//{"What will we do" : arrayOfChangetObjects}
+		for(let key in object){
+			if(key=="blastTiles"){
+				this.blastTiles(object[key]);
+			}
+		}
+	}
+	saveState(){
+		//This method save previous states of objects
+		for(let key in this.objectRegister){
+			let currentArray = this.objectRegister[key];
+			let newArray = new Array();
+			for(let i=0; i<currentArray.length; i++){
+				newArray[i] = currentArray[i];
+			}
+			this.preState[key] = newArray;
+		}
+	}
+	blastTiles(array) {
+		console.log("Start View.blastTiles()");
+		let k = 0;
+		let kd = 0;
+		let delay = 50;
+		this._drawPromise = new Promise((resolve,reject)=>{
+			for(let item of array){
+				setTimeout(()=>{
+					this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
+					let i = this.preState.Tile.indexOf(item);
+					this.preState.Tile[i] = null;
+					for(let tile of this.preState.Tile){
+						if(tile==null){
+							continue;
+						}
+						this.drawTile(tile);
+					}
+					kd++;
+					if(kd==k){
+						resolve("finish");
+					}
+				},delay*k);
+				k++;
+			}
+		});
+		this._drawPromise.then((resolve)=>{
+			console.log(resolve);
+		},(reject)=>{});
+    }
 }

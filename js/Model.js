@@ -16,6 +16,7 @@ class Game {
 		this.objectRegister = objectRegister;
 		this.objectRegister.Field = new Array();
 		this.objectRegister.Tile = new Array();
+		this.objectRegister.Stage = "startPlay";
 		console.log(this);
 	}
 	begin() {
@@ -35,6 +36,7 @@ class Game {
     }
 	facade(object){
 		//Any requests from the controller come here
+		//{"What will we do" : arrayOfChangetObjects}
 		for(let key in object){
 			if(key=="clickOnTile"){
 				if(object[key].length>=this.amountTilesForBlast){
@@ -43,7 +45,8 @@ class Game {
 			}
 		}
 	}
-	blastTiles(arrayTiles){
+	blastTiles(arrayTiles) {
+		this.objectRegister.Stage = "play";
 		//Remove tiles from objectRegister
 		console.log("Start Game.blastTiles()");
 		for(let i=0; i<arrayTiles.length; i++){
@@ -52,12 +55,17 @@ class Game {
 		}
 		//Remove tiles from field`s matrix
 		this.objectRegister.Field[0].deleteTiles(arrayTiles);
+		//--------------------------
+		this._view.facade({
+			"blastTiles" : arrayTiles
+		});
+		//------------------------
 		//Move tailes to vacant places
-		this.objectRegister.Field[0].fallTiles();
+		//this.objectRegister.Field[0].fallTiles();
 		//Add tailes for empty cell
-		let matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
-		matrixToLineArray(matrix, this.objectRegister.Tile);
-		this._view.draw();
+		//let matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
+		//matrixToLineArray(matrix, this.objectRegister.Tile);
+		//this._view.draw();
 	}
 }
 class Obj {
