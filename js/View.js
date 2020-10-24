@@ -47,6 +47,7 @@ class View{
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		this._drawPromise.then((resolve) => {
 			this.saveState();
+			this.objectRegister.isControled = true;
 		});
     }
 	drawField(field,Z=0){
@@ -158,20 +159,6 @@ class View{
 			this.preState[key] = newArray;
 		}
 	}
-	updateState() {
-		//This method update phisical parameters of obgects on objectRegister
-		console.log("Start View.updateState()");
-		for (let key in this.preState) {
-			let currentArray = this.preState[key];
-			for (let i = 0; i < currentArray.length; i++) {
-				for (let k in currentArray[i]) {
-					if (k == "X" || k == "Y" || k == "Z" || k == "width" || k == "height" || k == "row" || k == "column") {
-						this.objectRegister[key][i][k] = currentArray[i][k];
-                    }
-				}
-			}
-		}
-    }
 	findProto(object) {
 		//This method searches for the object based on which the copy was created
 		for (let key in this.preState) {
@@ -196,6 +183,7 @@ class View{
 			console.log(resolve);
 			return new Promise((resolve, reject) => {
 				console.log("Start View.blastTiles()");
+				this.objectRegister.isControled = false;
 				for (let item of array) {
 					setTimeout(() => {
 						this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
@@ -304,6 +292,7 @@ class View{
 						kd++;
 						if (kd == k) {
 							this.saveState();
+							this.objectRegister.isControled = true;
 							resolve("Finish View.addTiles()");
 							console.log("--------End of turn--------");
 						}

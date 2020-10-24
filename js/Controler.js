@@ -12,6 +12,10 @@ class Controller {
         document.addEventListener('click', (event) => {
             let mouseX = event.offsetX;
             let mouseY = event.offsetY;
+            if (this.objectRegister.isControled == false) {
+                console.log("Controller cannot controle!");
+                return;
+            }
             for (let key in this.objectRegister) {
                 for (let i = 0; i < this.objectRegister[key].length; i++) {
 					if(this.objectRegister[key][i]==null){

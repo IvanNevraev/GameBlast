@@ -6,7 +6,7 @@ class Game {
 	 */
 	_view;
 	objectRegister = {};
-	amountWariablesColors = 2;
+	amountWariablesColors = 3;
 	amountTilesForBlast = 2;
 	amountTilesInWidth = 5;
 	amountTilesInHeight = 5;
@@ -16,6 +16,7 @@ class Game {
 		this.objectRegister = objectRegister;
 		this.objectRegister.Field = new Array();
 		this.objectRegister.Tile = new Array();
+		this.objectRegister.isControled = false;
 		console.log(this);
 	}
 	buildeLevel() {
