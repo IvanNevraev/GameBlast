@@ -151,6 +151,8 @@ class View{
 					o = new Tile();
 				} else if (currentArray[i] instanceof Field) {
 					o = new Field();
+				} else if (currentArray[i] instanceof Button) {
+					o = new Button;
                 }
 				newArray[i] = o;
 				for (let k in currentArray[i]) {
@@ -306,11 +308,23 @@ class View{
 		this._drawPromise = newPromise;
 	}
 	drawBackground() {
-		console.log(this._ctxCanvas.width);
+		console.log("Start View.drawBackground()");
 		this._ctxCanvas.drawImage(this._images.Background[0], 0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
 	}
 	drawPauseButton() {
 		console.log("Start View.drawPauseButton()");
+		for (let item of this.objectRegister.Button) {
+			if (item instanceof PauseButton) {
+				let widthWindow = document.documentElement.clientWidth;
+				item.X = widthWindow - 20 - 50;
+				item.Y = 20;
+				item.width = 50;
+				item.height = 50;
+				item.Z = 1;
+				item.img = this._images.Button[0];
+				this.drawImage(item);
+            }
+        }
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");

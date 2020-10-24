@@ -35,12 +35,17 @@ class Controller {
         });
     }
     targetObjectForClick(object) {
+        console.log("Start Controller.targetObjectForClick()");
 		//This function for check target object for available actions
         if (object instanceof Tile) {
-			//Call the facade of the Game class
+            //Call the facade of the Game class
             this._game.facade({
-				"clickOnTile":this.getArrayTilesWithSameColor(object)
-			});
+                "clickOnTile": this.getArrayTilesWithSameColor(object)
+            });
+        } else if (object instanceof PauseButton) {
+            this._game.facade({
+                "clickOnPauseButton": object
+            });
         }
     }
     getArrayTilesWithSameColor(tile) {

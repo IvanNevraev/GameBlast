@@ -16,15 +16,19 @@ class Game {
 		this.objectRegister = objectRegister;
 		this.objectRegister.Field = new Array();
 		this.objectRegister.Tile = new Array();
+		this.objectRegister.Button = new Array();
 		this.objectRegister.isControled = false;
 		console.log(this);
 	}
 	buildeLevel() {
 		console.log("Start Model.buildeLevel()");
 		this.createNewField();
-		this.objectRegister.Button = new PauseButton("pauseButton1");
+		this.objectRegister.Button.push(new PauseButton("pauseButton1"));
 		this._view.facade({"buildeLevel":[]});
 	}
+	buildePause() {
+		console.log("Start Model.buildePause()");
+    }
 	createNewField() {
 		//Create new field
 		let field = new Field(this.amountTilesInWidth, this.amountTilesInHeight);
@@ -40,11 +44,13 @@ class Game {
 		//Any requests from the controller come here
 		//{"What will we do" : arrayOfChangetObjects}
 		for(let key in object){
-			if(key=="clickOnTile"){
-				if(object[key].length>=this.amountTilesForBlast){
+			if (key == "clickOnTile") {
+				if (object[key].length >= this.amountTilesForBlast) {
 					this.blastTiles(object[key]);
 				}
-			}
+			} else if (key == "clickOnPauseButton") {
+				this.buildePause();
+            }
 		}
 	}
 	blastTiles(arrayTiles) {
@@ -206,12 +212,12 @@ class Tile extends Obj{
 class Button extends Obj {
 	_id;
 	constructor(id="unkown") {
-		supper();
+		super();
 		this._id = id;
     }
 }
 class PauseButton extends Button {
-	constructor() {
-		supper();
+	constructor(id) {
+		super(id);
     }
 }
