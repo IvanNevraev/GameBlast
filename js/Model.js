@@ -46,7 +46,6 @@ class Game {
 		}
 	}
 	blastTiles(arrayTiles) {
-		this.objectRegister.Stage = "play";
 		//Remove tiles from objectRegister
 		console.log("Start Game.blastTiles()");
 		for(let i=0; i<arrayTiles.length; i++){

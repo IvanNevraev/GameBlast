@@ -49,7 +49,7 @@ class View{
 			this.saveState();
 		});
     }
-	drawField(field,Z){
+	drawField(field,Z=0){
 		//Set phisical parametrs and draw
 		//Field are in center window all time
 		field.Z = Z;
@@ -158,6 +158,20 @@ class View{
 			this.preState[key] = newArray;
 		}
 	}
+	updateState() {
+		//This method update phisical parameters of obgects on objectRegister
+		console.log("Start View.updateState()");
+		for (let key in this.preState) {
+			let currentArray = this.preState[key];
+			for (let i = 0; i < currentArray.length; i++) {
+				for (let k in currentArray[i]) {
+					if (k == "X" || k == "Y" || k == "Z" || k == "width" || k == "height" || k == "row" || k == "column") {
+						this.objectRegister[key][i][k] = currentArray[i][k];
+                    }
+				}
+			}
+		}
+    }
 	findProto(object) {
 		//This method searches for the object based on which the copy was created
 		for (let key in this.preState) {
@@ -222,20 +236,25 @@ class View{
 					let copyTile = this.findProto(item);
 					if (copyTile.row != item.row) {
 						let newY = copyTile.Y + (item.row - copyTile.row) * copyTile.height;
+						let startRow = copyTile.row;
+						let newRow = item.row;
+						copyTile.row = newRow;
 						tileForFall.push({
 							"copyTile": copyTile,
-							"startRow": copyTile.row,
-							"finishRow": item.row,
+							"startRow": startRow,
+							"finishRow": newRow,
 							"startY": copyTile.Y,
 							"finishY": newY
 						});
+						item.row = newRow;
+						item.Y = newY;
 					} else {
 						tileForStay.push(copyTile);
 					}
 				}
 				for (let i = 0; i < cadrs; i++) {
 					setTimeout(() => {
-						this.drawField(this.preState.Field[0]);
+						this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
 						for (let item of tileForStay) {
 							this.drawImage(item);
                         }
@@ -265,17 +284,18 @@ class View{
 				console.log("Start View.addTiles()");
 				let tilesForAdded = new Array();
 				let tilesForStay = new Array();
-				for (let item of array) {
+				for (let i = 0; i < array.length; i++) {
 					//No new tiles is this.preState, mean, we should add it
-					if (this.findProto(item) == null) {
-						tilesForAdded.push(item);
+					if (this.findProto(array[i]) == null) {
+						//This tile are for added
+						tilesForAdded.push(array[i]);
 					} else {
-						tilesForStay.push(item);
+						tilesForStay.push(array[i]);
 					}
 				}
 				for (let item of tilesForAdded) {
 					setTimeout(() => {
-						this.drawField(this.preState.Field[0]);
+						this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
 						for (let i of tilesForStay) {
 							this.drawTile(i);
 						}
@@ -283,7 +303,9 @@ class View{
 						tilesForStay.push(item);
 						kd++;
 						if (kd == k) {
+							this.saveState();
 							resolve("Finish View.addTiles()");
+							console.log("--------End of turn--------");
 						}
 					}, delay * k);
 					k++;
@@ -291,5 +313,87 @@ class View{
 			});
 		});
 		this._drawPromise = newPromise;
+	}
+	checkParameters() {
+		console.log("Start View.checkParameters()");
+		//This method checks if all drawn objects are in the general object registry.
+		for (let key in this.objectRegister) {
+			if (this.preState[key] == null) {
+				if (this.objectRegister[key] != null) {
+					console.log("Cath inconsistensy!");
+					console.log({
+						"View.preState": this.preState[key],
+						"View.objectRegister": this.objectRegister[key]
+					});
+					continue;
+				} else {
+					continue;
+				}
+			}
+			if (this.objectRegister[key] instanceof Array) {
+				for (let i = 0; i < this.objectRegister[key].length; i++) {
+					if (this.preState[key][i] == null) {
+						if (this.objectRegister[key][i] != null) {
+							console.log("Cath inconsistensy!");
+							console.log({
+								"View.preState": this.preState[key][i],
+								"View.objectRegister": this.objectRegister[key][i],
+							});
+							continue;
+						} else {
+							continue;
+						}
+					}
+					if (this.preState[key][i].proto != this.objectRegister[key][i]) {
+						console.log("Cath inconsistensy!");
+						console.log({
+							"View.preState": this.preState[key],
+							"View.objectRegister": this.objectRegister[key],
+							"index": i,
+							"View.preState[key][i]": this.preState[key][i],
+							"View.objectRegister[key][i]": this.objectRegister[key][i]
+						});
+					}
+                }
+
+			} else if (this.objectRegister[key] instanceof Object) {
+				for (let k in this.objectRegister[key]) {
+					if (this.preState[key][k] == null) {
+						if (this.objectRegister[key][k] != null) {
+							console.log("Cath inconsistensy!");
+							console.log({
+								"View.preState": this.preState[key][i],
+								"View.objectRegister": this.objectRegister[key][i],
+							});
+							continue;
+						} else {
+							continue;
+						}
+					}
+					if (this.preState[key][k] != this.objectRegister[key][k]) {
+						console.log("Cath inconsistensy!");
+						console.log({
+							"View.preState": this.preState[key],
+							"View.objectRegister": this.objectRegister[key],
+							"key": k,
+							"View.preState[key][k]": this.preState[key][k],
+							"View.objectRegister[key][k]": this.objectRegister[key][k]
+						});
+					}
+                }
+
+			} else {
+				if (this.preState[key] != this.objectRegister[key]) {
+					console.log("Cath inconsistensy!");
+					console.log({
+						"View.preState": this.preState,
+						"View.objectRegister": this.objectRegister,
+						"key": key,
+						"View.preState[key]": this.preState[key],
+						"View.objectRegister[key]": this.objectRegister[key]
+					});
+                }
+            }
+        }
     }
 }
