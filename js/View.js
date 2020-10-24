@@ -325,6 +325,9 @@ class View{
 				this.drawImage(item);
             }
         }
+	}
+	drawBackgroundProgress() {
+		console.log();
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");

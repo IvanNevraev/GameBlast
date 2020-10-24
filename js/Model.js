@@ -10,6 +10,11 @@ class Game {
 	amountTilesForBlast = 2;
 	amountTilesInWidth = 5;
 	amountTilesInHeight = 5;
+	level = 0;    
+	points = 0;
+	goal = 0;    //level*1000
+	progress = 0; //Precent of goal level 0-100
+	moves = 0;     //Remaining moves 50-(level*2)
 
 	constructor(view, objectRegister) {
 		this._view = view;
@@ -18,10 +23,20 @@ class Game {
 		this.objectRegister.Tile = new Array();
 		this.objectRegister.Button = new Array();
 		this.objectRegister.isControled = false;
+		this.objectRegister.ParametesOfGame = {
+			"progress" : 0
+		};
 		console.log(this);
 	}
-	buildeLevel() {
+	buildeLevel(level) {
 		console.log("Start Model.buildeLevel()");
+		this.level = level;
+		this.goal = level * 1000;
+		this.moves = 50 - (level * 2);
+		//Amount colors level/2 but from 2 to 5
+		let amountColors = Math.round(level / 2);
+		this.amountWariablesColors = amountColors < 2 ? 2 : (amountColors > 5 ? 5 : amountColors);
+		this.amountTilesInWidth = this.amountTilesInHeight = 4 + level;
 		this.createNewField();
 		this.objectRegister.Button.push(new PauseButton("pauseButton1"));
 		this._view.facade({"buildeLevel":[]});
@@ -47,6 +62,7 @@ class Game {
 			if (key == "clickOnTile") {
 				if (object[key].length >= this.amountTilesForBlast) {
 					this.blastTiles(object[key]);
+					this.countParametersOfLevel(object[key]);
 				}
 			} else if (key == "clickOnPauseButton") {
 				this.buildePause();
@@ -79,6 +95,29 @@ class Game {
 			"addTiles": this.objectRegister.Tile
 		});
 	}
+	countParametersOfLevel(arrayTiles) {
+		//This method recount parameters of Level
+		//One blasted tile +10 points
+		console.log("Start Model.countParametresOfLevel()");
+		let addPoints = arrayTiles.length * 10
+		this.points += addPoints;
+		this.progress += (addPoints / this.goal) * 100;
+		this.moves--;
+		console.log("----------------");
+		console.log("Points:" + this.points + " Progress:" + this.progress + " Moves:" + this.moves);
+		console.log("----------------");
+		this.checkEndGame();
+	}
+	checkEndGame() {
+		console.log("Start Model.checkEndGame()");
+		if (this.points >= this.goal) {
+			console.log("--------WINS--------");
+		} else {
+			if (this.moves <= 0) {
+				console.log("--------LOSE--------");
+            }
+        }
+    }
 }
 class Obj {
 	width = 0;
