@@ -45,6 +45,7 @@ class View{
 		console.log("Start View.buildeLevel()");
 		this.drawBackground();
 		this.drawPauseButton();
+		this.drawBackgroundProgress();
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		this._drawPromise.then((resolve) => {
@@ -326,8 +327,48 @@ class View{
             }
         }
 	}
-	drawBackgroundProgress() {
-		console.log();
+	drawBackgroundProgress(percent=50) {
+		let widthWindow = document.documentElement.clientWidth;
+		let heightWindow = document.documentElement.clientHeight;
+		let WBP;
+		let HBP;
+		let XBP;
+		let YBP;
+		if (widthWindow >= heightWindow) {
+			HBP = heightWindow * 0.2 - 40;
+			WBP = HBP*3.5;
+			XBP = (widthWindow/2) -(WBP/2);
+			YBP = 30;
+		} else {
+			WBP = widthWindow * 0.6;
+			HBP = heightWindow * 0.2 - 40;
+			XBP = widthWindow * 0.2;
+			YBP = 20;
+        }
+		let IBP = this._images.Progress[0];
+		this._ctxCanvas.drawImage(IBP, XBP, YBP, WBP, HBP);
+		let barProgress = new Obj();
+		let fullFill = WBP * 0.853;
+
+		//Draw progress bar
+		let width = fullFill * percent/100;
+		let height = HBP * 0.23;
+		let x = XBP + WBP * 0.072;
+		let y = YBP + HBP * 0.6;
+		let gr = this._ctxCanvas.createLinearGradient(x + (width / 2), y, x + (width / 2), y + height);
+		gr.addColorStop(0.0, '#b2ff74');
+		gr.addColorStop(0.5, '#069f00');
+		gr.addColorStop(0.7, '#069f00');
+		gr.addColorStop(1.0, '#b2ff74');
+		this._ctxCanvas.fillStyle = gr;
+		this._ctxCanvas.beginPath();
+		this._ctxCanvas.moveTo(x, y);
+		this._ctxCanvas.lineTo(x + width, y);
+		this._ctxCanvas.arc(x + width, y + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, false);
+		this._ctxCanvas.lineTo(x, y + height);
+		this._ctxCanvas.arc(x, y + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, true);
+		this._ctxCanvas.closePath();
+		this._ctxCanvas.fill();
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");
