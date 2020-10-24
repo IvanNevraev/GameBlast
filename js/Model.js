@@ -23,7 +23,9 @@ class Game {
 		this.objectRegister.Tile = new Array();
 		this.objectRegister.Button = new Array();
 		this.objectRegister.isControled = false;
-		this.objectRegister.ParametesOfGame = {
+		this.objectRegister.ParametersOfGame = {
+			"widthInTiles": 0,
+			"heightInTiles": 0,
 			"progress" : 0
 		};
 		console.log(this);
@@ -36,7 +38,8 @@ class Game {
 		//Amount colors level/2 but from 2 to 5
 		let amountColors = Math.round(level / 2);
 		this.amountWariablesColors = amountColors < 2 ? 2 : (amountColors > 5 ? 5 : amountColors);
-		this.amountTilesInWidth = this.amountTilesInHeight = 4 + level;
+		this.objectRegister.ParametersOfGame.widthInTiles = this.amountTilesInWidth = 4 + level;
+		this.objectRegister.ParametersOfGame.heightInTiles = this.amountTilesInHeight = 4 + level;
 		this.createNewField();
 		this.objectRegister.Button.push(new PauseButton("pauseButton1"));
 		this._view.facade({"buildeLevel":[]});
@@ -102,6 +105,7 @@ class Game {
 		let addPoints = arrayTiles.length * 10
 		this.points += addPoints;
 		this.progress += (addPoints / this.goal) * 100;
+		this.objectRegister.ParametersOfGame.progress = this.progress;
 		this.moves--;
 		console.log("----------------");
 		console.log("Points:" + this.points + " Progress:" + this.progress + " Moves:" + this.moves);

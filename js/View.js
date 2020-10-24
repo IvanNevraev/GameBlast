@@ -45,7 +45,8 @@ class View{
 		console.log("Start View.buildeLevel()");
 		this.drawBackground();
 		this.drawPauseButton();
-		this.drawBackgroundProgress();
+		this.drawProgress();
+		this.drawPanelScope();
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		this._drawPromise.then((resolve) => {
@@ -64,12 +65,24 @@ class View{
 		//Index width/height field
 		let widthInTiles = field._matrixOfTiles[0].length;
 		let heightInTiles = field._matrixOfTiles.length;
-		if(widthInTiles>heightInTiles){
+		if (widthInTiles == heightInTiles) {
+			if (widthWindow > heightWindow) {
+				field.height = heightWindow * 0.6;
+				field.width = field.height;
+				field.X = (widthWindow / 2) - (field.width / 2);
+				field.Y = heightWindow * 0.2;
+			} else {
+				field.width = widthWindow * 0.6;
+				field.height = field.width;
+				field.X = (widthWindow / 2) - (field.width / 2);
+				field.Y = heightWindow * 0.2;
+            }
+        }else if(widthInTiles>heightInTiles){
 			//Centering in width
 			field.width = widthWindow*0.6;
 			field.height = field.width*(heightInTiles/widthInTiles);
 			field.X = widthWindow*0.2;
-			field.Y = (heightWindow/2)-(field.height/2);
+			field.Y = heightWindow*0.2;
 		}else{
 			//Centering in height
 			field.height = heightWindow*0.6;
@@ -296,6 +309,7 @@ class View{
 						tilesForStay.push(item);
 						kd++;
 						if (kd == k) {
+							this.drawProgress(this.objectRegister.ParametersOfGame.progress);
 							this.saveState();
 							this.objectRegister.isControled = true;
 							resolve("Finish View.addTiles()");
@@ -327,7 +341,8 @@ class View{
             }
         }
 	}
-	drawBackgroundProgress(percent=50) {
+	drawProgress(percent = 0) {
+		percent = percent > 100 ? 100 : percent;
 		let widthWindow = document.documentElement.clientWidth;
 		let heightWindow = document.documentElement.clientHeight;
 		let WBP;
@@ -369,6 +384,39 @@ class View{
 		this._ctxCanvas.arc(x, y + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, true);
 		this._ctxCanvas.closePath();
 		this._ctxCanvas.fill();
+	}
+	drawPanelScope() {
+		let widthWindow = document.documentElement.clientWidth;
+		let heightWindow = document.documentElement.clientHeight;
+		let widthInTiles = this.objectRegister.ParametersOfGame.widthInTiles;
+		let heightInTiles = this.objectRegister.ParametersOfGame.heightInTiles;
+		let width;
+		let height;
+		let x;
+		let y;
+		if (widthInTiles == heightInTiles) {
+			if (widthWindow > heightWindow) {
+				height = width = (widthWindow * 0.5) - (heightWindow * 0.3) - 20;
+				x = (widthWindow * 0.5) + (heightWindow * 0.3) + 10;
+				y = (heightWindow * 0.5) - (height * 0.5);
+
+			} else {
+				width = height = widthWindow * 0.2;
+				x = (widthWindow * 0.9) - (width * 0.5);
+				y = (heightWindow * 0.2) + (widthWindow * 0.3) - (height * 0.5);
+			}
+		} else if (widthInTiles > heightInTiles) {
+			height = width = (widthWindow * 0.2) - 20;
+			x = (widthWindow * 0.9) - (width * 0.5);
+			y = (heightWindow * 0.2) + widthWindow * 0.6 * (heightInTiles / widthInTiles) * 0.5 - (height * 0.5);
+		} else {
+			height = width = (widthWindow - ((widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5)) - 15;
+			height = width = height > heightWindow * 0.6 ? heightWindow * 0.6 : height;
+			x = (widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5 + 10;
+			y = (heightWindow * 0.5) - (height * 0.5);
+        }
+		let img = this._images.PanelScope[0];
+		this._ctxCanvas.drawImage(img,x,y,width,height);
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");
