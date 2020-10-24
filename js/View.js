@@ -43,6 +43,7 @@ class View{
 	}
 	buildeLevel() {
 		console.log("Start View.buildeLevel()");
+		this.drawBackground();
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		this._drawPromise.then((resolve) => {
@@ -303,6 +304,10 @@ class View{
 		});
 		this._drawPromise = newPromise;
 	}
+	drawBackground() {
+		console.log(this._ctxCanvas.width);
+		this._ctxCanvas.drawImage(this._images.Background[0], 0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
+    }
 	checkParameters() {
 		console.log("Start View.checkParameters()");
 		//This method checks if all drawn objects are in the general object registry.

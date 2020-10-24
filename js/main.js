@@ -7,10 +7,11 @@ function main() {
 	//This is object with names of images
 	//Name of class : name of image
 	let nameOfImages = {
-		"amountOfFiles" : 6,
+		"amountOfFiles" : 7,
 		"puthToFiles" : "img/",
 		"Field" : ["Field.png"],
-		"Tile" : ["BlueTile.png","GreenTile.png","PurpleTile.png","RedTile.png","YellowTile.png"],
+		"Tile": ["BlueTile.png", "GreenTile.png", "PurpleTile.png", "RedTile.png", "YellowTile.png"],
+		"Background": ["Background.jpg"]
 	};
 	//This register will use all our classes
 	//It containes all game objects
