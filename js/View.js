@@ -44,6 +44,7 @@ class View{
 	buildeLevel() {
 		console.log("Start View.buildeLevel()");
 		this.drawBackground();
+		this.drawPauseButton();
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		this._drawPromise.then((resolve) => {
@@ -307,6 +308,9 @@ class View{
 	drawBackground() {
 		console.log(this._ctxCanvas.width);
 		this._ctxCanvas.drawImage(this._images.Background[0], 0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
+	}
+	drawPauseButton() {
+		console.log("Start View.drawPauseButton()");
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");

@@ -22,6 +22,7 @@ class Game {
 	buildeLevel() {
 		console.log("Start Model.buildeLevel()");
 		this.createNewField();
+		this.objectRegister.Button = new PauseButton("pauseButton1");
 		this._view.facade({"buildeLevel":[]});
 	}
 	createNewField() {
@@ -201,4 +202,16 @@ class Tile extends Obj{
 		this.row = row;
 		this.column = column;
 	}
+}
+class Button extends Obj {
+	_id;
+	constructor(id="unkown") {
+		supper();
+		this._id = id;
+    }
+}
+class PauseButton extends Button {
+	constructor() {
+		supper();
+    }
 }

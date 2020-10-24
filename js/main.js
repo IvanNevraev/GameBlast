@@ -11,6 +11,7 @@ function main() {
 		"puthToFiles" : "img/",
 		"Field" : ["Field.png"],
 		"Tile": ["BlueTile.png", "GreenTile.png", "PurpleTile.png", "RedTile.png", "YellowTile.png"],
+		"Button" : ["PauseButton.png"],
 		"Background": ["Background.jpg"]
 	};
 	//This register will use all our classes
