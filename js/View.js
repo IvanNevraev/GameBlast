@@ -41,8 +41,15 @@
 			}
 		});
 	}
-	buildeLevel() {
-		console.log("Start View.buildeLevel()");
+	drawLevel() {
+		console.log("Start View.drawLevel()");
+		//Rest button parameters
+		for (let item of this.objectRegister.Button) {
+			if (item instanceof MenuButton || item instanceof RepeatButton || item instanceof NextButton) {
+				this.drawButton(item, this._images.Button[1]);
+            }
+        }
+		//Draw new level
 		let addres = this.objectRegister.ParametersOfGame;
 		this.drawBackground();
 		this.drawPauseButton();
@@ -50,13 +57,18 @@
 		this.drawPanelScope(addres.points, addres.moves, addres.level);
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
-		this._drawPromise.then((resolve) => {
-			this.drawWin();
-			this.saveState();
-			this.objectRegister.isControled = true;
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				console.log("Start View.saveState() on View.drawLevel()");
+				this.saveState();
+				this.objectRegister.isControled = true;
+				resolve("Finish View.saveState() on View.drawLevel()");
+			});
 		});
+		this._drawPromise = newPromise;
     }
-	drawField(field,Z=0){
+	drawField(field, Z = 0) {
 		//Set phisical parametrs and draw
 		//Field are in center window all time
 		field.Z = Z;
@@ -113,12 +125,12 @@
 		this.drawImage(tile);
 	}
 	drawAllTiles(tiles, delay = 0) {
-		console.log("Start View.drawAllTiles()");
 		let k = 0;
 		let kd = 0;
 		let newPromise = this._drawPromise.then((resolve) => {
 			console.log(resolve);
 			return new Promise((resolve, reject) => {
+				console.log("Start View.drawAllTiles()");
 				for (let i = 0; i < tiles.length; i++) {
 					if (tiles[i] != null) {
 						setTimeout(() => {
@@ -145,12 +157,14 @@
 			for (let key in object) {
 				if (key == "blastTiles") {
 					this.blastTiles(object[key]);
-				} else if (key == "buildeLevel") {
-					this.buildeLevel();
+				} else if (key == "drawLevel") {
+					this.drawLevel();
 				} else if (key == "fallTiles") {
 					this.fallTiles(object[key]);
 				} else if (key == "addTiles") {
 					this.addTiles(object[key]);
+				} else if (key == "drawWin") {
+					this.drawWin();
                 }
 			}
 		}, (reject) => { });
@@ -447,47 +461,55 @@
 
 	}
 	drawWin() {
-		let widthWindow = document.documentElement.clientWidth;
-		let heightWindow = document.documentElement.clientHeight;
-		//Draw div
-		let widthDiv = widthWindow * 0.6;
-		let heightImage = widthDiv * 1.5; //This is all height image div + a image of win
-		let heightDiv = widthDiv * 0.3;
-		if (heightImage > heightWindow) {
-			heightDiv = heightWindow*0.3;
-			widthDiv = heightDiv / 0.3;
-        }
-		let xDiv = widthWindow * 0.5 - widthDiv * 0.5;
-		let yDiv = heightWindow * 0.5;
-		if (widthWindow < heightWindow) {
-			yDiv = widthWindow * 0.6;
-        }
-		let imgDiv = this._images.Field[0];
-		this._ctxCanvas.drawImage(imgDiv, xDiv, yDiv, widthDiv, heightDiv);
-		//Draw butoons
-		let widthButtons = widthDiv*0.28;
-		let heightButtons = heightDiv * 0.4;
-		let yButtons = yDiv + heightDiv * 0.5 - heightButtons * 0.5;
-		let imgButtons = this._images.Button[1];
-		let xRepeatButtons = xDiv + widthDiv*0.5 - widthButtons*0.5;
-		let xMenuButtons = xRepeatButtons - widthButtons - widthDiv*0.02;
-		let xNextButtons = xRepeatButtons + widthButtons + widthDiv*0.02;
-		for (let item of this.objectRegister.Button) {
-			if (item instanceof MenuButton) {
-				this.drawButton(item, imgButtons, xMenuButtons, yButtons, widthButtons, heightButtons, "Меню");
-			} else if (item instanceof RepeatButton) {
-				this.drawButton(item, imgButtons, xRepeatButtons, yButtons, widthButtons, heightButtons, "Повтор");
-			} else if (item instanceof NextButton) {
-				this.drawButton(item, imgButtons, xNextButtons, yButtons, widthButtons, heightButtons, "Вперед");
-            }
-        }
-		//Draw WIN
-		let widthWinImage = widthDiv*1.2;
-		let heightWinImage = widthWinImage;
-		let xWinImage = widthWindow * 0.5 - widthWinImage * 0.5;
-		let yWinImage = yDiv - heightWinImage*0.66;
-		let imgWinImage = this._images.Win[0];
-		this._ctxCanvas.drawImage(imgWinImage, xWinImage, yWinImage, widthWinImage, heightWinImage);
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				console.log("Start View.drawVin()");
+				let widthWindow = document.documentElement.clientWidth;
+				let heightWindow = document.documentElement.clientHeight;
+				//Draw div
+				let widthDiv = widthWindow * 0.6;
+				let heightImage = widthDiv * 1.5; //This is all height image div + a image of win
+				let heightDiv = widthDiv * 0.3;
+				if (heightImage > heightWindow) {
+					heightDiv = heightWindow * 0.3;
+					widthDiv = heightDiv / 0.3;
+				}
+				let xDiv = widthWindow * 0.5 - widthDiv * 0.5;
+				let yDiv = heightWindow * 0.5;
+				if (widthWindow < heightWindow) {
+					yDiv = widthWindow * 0.6;
+				}
+				let imgDiv = this._images.Field[0];
+				this._ctxCanvas.drawImage(imgDiv, xDiv, yDiv, widthDiv, heightDiv);
+				//Draw butoons
+				let widthButtons = widthDiv * 0.28;
+				let heightButtons = heightDiv * 0.4;
+				let yButtons = yDiv + heightDiv * 0.5 - heightButtons * 0.5;
+				let imgButtons = this._images.Button[1];
+				let xRepeatButtons = xDiv + widthDiv * 0.5 - widthButtons * 0.5;
+				let xMenuButtons = xRepeatButtons - widthButtons - widthDiv * 0.02;
+				let xNextButtons = xRepeatButtons + widthButtons + widthDiv * 0.02;
+				for (let item of this.objectRegister.Button) {
+					if (item instanceof MenuButton) {
+						this.drawButton(item, imgButtons, xMenuButtons, yButtons, widthButtons, heightButtons, "Меню");
+					} else if (item instanceof RepeatButton) {
+						this.drawButton(item, imgButtons, xRepeatButtons, yButtons, widthButtons, heightButtons, "Повтор");
+					} else if (item instanceof NextButton) {
+						this.drawButton(item, imgButtons, xNextButtons, yButtons, widthButtons, heightButtons, "Вперед");
+					}
+				}
+				//Draw WIN
+				let widthWinImage = widthDiv * 1.2;
+				let heightWinImage = widthWinImage;
+				let xWinImage = widthWindow * 0.5 - widthWinImage * 0.5;
+				let yWinImage = yDiv - heightWinImage * 0.66;
+				let imgWinImage = this._images.Win[0];
+				this._ctxCanvas.drawImage(imgWinImage, xWinImage, yWinImage, widthWinImage, heightWinImage);
+				resolve("Finish View.drawWin()");
+			});
+		});
+		this._drawPromise = newPromise;
 	}
 	drawButton(object = null, img = null, x = 0, y = 0, width = 0, height = 0, text = "") {
 		object.X = x;

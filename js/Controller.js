@@ -47,8 +47,16 @@ class Controller {
                 "clickOnPauseButton": object
             });
         } else if (object instanceof MenuButton) {
-            this, this._game.facade({
+            this._game.facade({
                 "clickOnMenuButton": object
+            });
+        } else if (object instanceof RepeatButton) {
+            this._game.facade({
+                "ckickOnRepeatButton": object
+            });
+        } else if (object instanceof NextButton) {
+            this._game.facade({
+                "clickOnNextButton": object
             });
         }
     }

@@ -33,12 +33,18 @@ class Game {
 		};
 		console.log(this);
 	}
+	buildeGame() {
+		this.buildeLevel(1);
+		this.createButtons();
+    }
 	buildeLevel(level) {
 		console.log("Start Model.buildeLevel()");
 		this.level = level;
 		this.goal = level * 1000;
 		this.moves = 50 - (level * 2);
-		this.amountTilesForBlast = level + 1 + 999;
+		this.amountTilesForBlast = level + 1;
+		this.points = 0;
+		this.progress = 0;
 		//Amount colors level/2 but from 2 to 5
 		let amountColors = Math.round(level / 2);
 		this.amountWariablesColors = amountColors < 2 ? 2 : (amountColors > 5 ? 5 : amountColors);
@@ -47,9 +53,12 @@ class Game {
 		addres.heightInTiles = this.amountTilesInHeight = 4 + level;
 		addres.level = level;
 		addres.moves = this.moves;
+		addres.points = 0;
+		addres.progress = 0;
 		this.createNewField();
-		this.createButtons();
-		this._view.facade({"buildeLevel":[]});
+		this._view.facade({
+			"drawLevel": []
+		});
 	}
 	buildePause() {
 		console.log("Start Model.buildePause()");
@@ -61,7 +70,7 @@ class Game {
 		//Create new field
 		let field = new Field(this.amountTilesInWidth, this.amountTilesInHeight);
 		//Add it into  register
-		this.objectRegister.Field.push(field);
+		this.objectRegister.Field[0] = field;
 		//Call field`s method for create new tiles
 		//Link these tiles with register
 		matrixToLineArray(field.craeteTiles(this.amountWariablesColors), this.objectRegister.Tile);
@@ -81,6 +90,10 @@ class Game {
 				this.buildePause();
 			} else if (key == "clickOnMenuButton") {
 				this.buildeLobby();
+			} else if (key == "ckickOnRepeatButton") {
+				this.buildeLevel(this.level);
+			} else if (key == "clickOnNextButton") {
+				this.buildeLevel(++this.level);
             }
 		}
 	}
@@ -131,6 +144,9 @@ class Game {
 		console.log("Start Model.checkEndGame()");
 		if (this.points >= this.goal) {
 			console.log("--------WINS--------");
+			this._view.facade({
+				"drawWin" : "WIN"
+			});
 			this.amountTilesForBlast = 9999;
 			this._view.facade({
 				"buildeWin" : "Win"
