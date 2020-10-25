@@ -1,4 +1,4 @@
-class View{
+﻿class View{
 	/*
 	 This class draws all objects. Loads the required resources. 
 	 Sets physical parameters for objects so that the controller can then identify them.
@@ -43,13 +43,15 @@ class View{
 	}
 	buildeLevel() {
 		console.log("Start View.buildeLevel()");
+		let addres = this.objectRegister.ParametersOfGame;
 		this.drawBackground();
 		this.drawPauseButton();
 		this.drawProgress();
-		this.drawPanelScope();
+		this.drawPanelScope(addres.points, addres.moves, addres.level);
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		this._drawPromise.then((resolve) => {
+			this.drawWin();
 			this.saveState();
 			this.objectRegister.isControled = true;
 		});
@@ -309,7 +311,9 @@ class View{
 						tilesForStay.push(item);
 						kd++;
 						if (kd == k) {
-							this.drawProgress(this.objectRegister.ParametersOfGame.progress);
+							let addres = this.objectRegister.ParametersOfGame;
+							this.drawProgress(addres.progress);
+							this.drawPanelScope(addres.points, addres.moves, addres.level);
 							this.saveState();
 							this.objectRegister.isControled = true;
 							resolve("Finish View.addTiles()");
@@ -331,10 +335,11 @@ class View{
 		for (let item of this.objectRegister.Button) {
 			if (item instanceof PauseButton) {
 				let widthWindow = document.documentElement.clientWidth;
-				item.X = widthWindow - 20 - 50;
+				let width = widthWindow * 0.1
+				item.X = widthWindow - 20 - width;
 				item.Y = 20;
-				item.width = 50;
-				item.height = 50;
+				item.width = width;
+				item.height = width;
 				item.Z = 1;
 				item.img = this._images.Button[0];
 				this.drawImage(item);
@@ -385,7 +390,7 @@ class View{
 		this._ctxCanvas.closePath();
 		this._ctxCanvas.fill();
 	}
-	drawPanelScope() {
+	drawPanelScope(points = 0,moves = 0,level=0) {
 		let widthWindow = document.documentElement.clientWidth;
 		let heightWindow = document.documentElement.clientHeight;
 		let widthInTiles = this.objectRegister.ParametersOfGame.widthInTiles;
@@ -416,7 +421,55 @@ class View{
 			y = (heightWindow * 0.5) - (height * 0.5);
         }
 		let img = this._images.PanelScope[0];
-		this._ctxCanvas.drawImage(img,x,y,width,height);
+		this._ctxCanvas.drawImage(img, x, y, width, height);
+		//Draw text
+		this._ctxCanvas.fillStyle = "white";
+		this._ctxCanvas.textAlign = "center";
+		//Draw points
+		let xPoints = x + width * 0.5;
+		let yPoints = y + height * 0.86;
+		let fontSizePoints = height * 0.1;
+		this._ctxCanvas.font = fontSizePoints+"px Comic Sans MS";
+		this._ctxCanvas.fillText(points, xPoints, yPoints);
+		//Dravw moves
+		let xMoves = x + width * 0.5;
+		let yMoves = y + height * 0.47;
+		let fontSizeMoves = height * 0.2;
+		this._ctxCanvas.font = fontSizeMoves + "px Comic Sans MS";
+		this._ctxCanvas.fillText(moves, xMoves, yMoves);
+		//Draew level
+		let xLevel = x + width * 0.5;
+		let yLevel = y + height * 0.09;
+		let fontSizeLevel = height * 0.095;
+		this._ctxCanvas.font = fontSizeLevel + "px Comic Sans MS";
+		this._ctxCanvas.fillStyle = "black";
+		this._ctxCanvas.fillText("Уровень " + level, xLevel, yLevel);
+
+	}
+	drawWin() {
+		let widthWindow = document.documentElement.clientWidth;
+		let heightWindow = document.documentElement.clientHeight;
+		//Draw background field
+		let wB = widthWindow * 0.6;
+		let hB = wB * 0.3;
+		let xB = widthWindow * 0.5 - wB * 0.5;
+		let yB = heightWindow * 0.5;
+		let imgB = this._images.Field[0];
+		this._ctxCanvas.drawImage(imgB, xB, yB, wB, hB);
+		//Draw butoon menu
+		let wM = widthWindow * 0.6;
+		let hM = wB * 0.3;
+		let xM = widthWindow * 0.5 - wB * 0.5;
+		let yM = heightWindow * 0.5;
+		let imgM = this._images.Field[0];
+		this._ctxCanvas.drawImage(imgM, xM, yM, wM, hM);
+		//Draw WIN
+		let width = widthWindow * 0.8;
+		let height = heightWindow * 0.8;
+		let x = widthWindow * 0.5 - width * 0.5;
+		let y = yB - height*0.66;
+		let img = this._images.Win[0];
+		this._ctxCanvas.drawImage(img, x, y, width, height);
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");

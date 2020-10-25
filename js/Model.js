@@ -24,9 +24,12 @@ class Game {
 		this.objectRegister.Button = new Array();
 		this.objectRegister.isControled = false;
 		this.objectRegister.ParametersOfGame = {
-			"widthInTiles": 0,
-			"heightInTiles": 0,
-			"progress" : 0
+			"widthInTiles" : 0,
+			"heightInTiles" : 0,
+			"progress" : 0,
+			"points" : 0,
+			"moves" : 0,
+			"level" : 0
 		};
 		console.log(this);
 	}
@@ -38,10 +41,13 @@ class Game {
 		//Amount colors level/2 but from 2 to 5
 		let amountColors = Math.round(level / 2);
 		this.amountWariablesColors = amountColors < 2 ? 2 : (amountColors > 5 ? 5 : amountColors);
-		this.objectRegister.ParametersOfGame.widthInTiles = this.amountTilesInWidth = 4 + level;
-		this.objectRegister.ParametersOfGame.heightInTiles = this.amountTilesInHeight = 4 + level;
+		let addres = this.objectRegister.ParametersOfGame
+		addres.widthInTiles = this.amountTilesInWidth = 4 + level;
+		addres.heightInTiles = this.amountTilesInHeight = 4 + level;
+		addres.level = level;
+		addres.moves = this.moves;
 		this.createNewField();
-		this.objectRegister.Button.push(new PauseButton("pauseButton1"));
+		this.createButtons();
 		this._view.facade({"buildeLevel":[]});
 	}
 	buildePause() {
@@ -105,8 +111,11 @@ class Game {
 		let addPoints = arrayTiles.length * 10
 		this.points += addPoints;
 		this.progress += (addPoints / this.goal) * 100;
-		this.objectRegister.ParametersOfGame.progress = this.progress;
 		this.moves--;
+		let addres = this.objectRegister.ParametersOfGame;
+		addres.progress = this.progress;
+		addres.points = this.points;
+		addres.moves = this.moves;
 		console.log("----------------");
 		console.log("Points:" + this.points + " Progress:" + this.progress + " Moves:" + this.moves);
 		console.log("----------------");
@@ -116,11 +125,20 @@ class Game {
 		console.log("Start Model.checkEndGame()");
 		if (this.points >= this.goal) {
 			console.log("--------WINS--------");
-		} else {
-			if (this.moves <= 0) {
-				console.log("--------LOSE--------");
-            }
+			this.amountTilesForBlast = 9999;
+			this._view.facade({
+				"buildeWin" : "Win"
+			});
+		} else if (this.moves <= 0){
+			console.log("--------LOSE--------");
+			this.amountTilesForBlast = 9999;
         }
+	}
+	createButtons() {
+		this.objectRegister.Button.push(new PauseButton("pauseButton1"));
+		this.objectRegister.Button.push(new NextButton("nextButton1"));
+		this.objectRegister.Button.push(new RepeatButton("repeatButton1"));
+		this.objectRegister.Button.push(new MenuButton("menuButton1"));
     }
 }
 class Obj {
@@ -263,4 +281,19 @@ class PauseButton extends Button {
 	constructor(id) {
 		super(id);
     }
+}
+class NextButton extends Button {
+	constructor(id) {
+		supper(id);
+    }
+}
+class RepeatButton extends Button {
+	constructor(id) {
+		supper(id);
+	}
+}
+class MenuButton extends Button {
+	constructor(id) {
+		supper(id);
+	}
 }
