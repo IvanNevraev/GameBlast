@@ -165,6 +165,8 @@
 					this.addTiles(object[key]);
 				} else if (key == "drawWin") {
 					this.drawWin();
+				} else if (key == "drawLose") {
+					this.drawLose();
                 }
 			}
 		}, (reject) => { });
@@ -447,13 +449,13 @@
 		this._ctxCanvas.fillText(points, xPoints, yPoints);
 		//Dravw moves text
 		let xMoves = xPanel + widthPanel * 0.5;
-		let yMoves = yPanel + heightPanel * 0.47;
+		let yMoves = yPanel + heightPanel * 0.43;
 		let fontSizeMoves = heightPanel * 0.2;
 		this._ctxCanvas.font = fontSizeMoves + "px Comic Sans MS";
 		this._ctxCanvas.fillText(moves, xMoves, yMoves);
 		//Draew level text
 		let xLevel = xPanel + widthPanel * 0.5;
-		let yLevel = yPanel + heightPanel * 0.09;
+		let yLevel = yPanel + heightPanel * 0.07;
 		let fontSizeLevel = heightPanel * 0.095;
 		this._ctxCanvas.font = fontSizeLevel + "px Comic Sans MS";
 		this._ctxCanvas.fillStyle = "black";
@@ -529,6 +531,54 @@
 		this._ctxCanvas.fillText(text, xT, yT);
 
 
+	}
+	drawLose() {
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				console.log("Start View.drawLose()");
+				let widthWindow = document.documentElement.clientWidth;
+				let heightWindow = document.documentElement.clientHeight;
+				//Draw div
+				let widthDiv = widthWindow * 0.6;
+				let heightImage = widthDiv * 1.5; //This is all height image div + a image of win
+				let heightDiv = widthDiv * 0.3;
+				if (heightImage > heightWindow) {
+					heightDiv = heightWindow * 0.3;
+					widthDiv = heightDiv / 0.3;
+				}
+				let xDiv = widthWindow * 0.5 - widthDiv * 0.5;
+				let yDiv = heightWindow * 0.5;
+				if (widthWindow < heightWindow) {
+					yDiv = widthWindow * 0.6;
+				}
+				let imgDiv = this._images.Field[0];
+				this._ctxCanvas.drawImage(imgDiv, xDiv, yDiv, widthDiv, heightDiv);
+				//Draw butoons
+				let widthButtons = widthDiv * 0.28;
+				let heightButtons = heightDiv * 0.4;
+				let yButtons = yDiv + heightDiv * 0.5 - heightButtons * 0.5;
+				let imgButtons = this._images.Button[1];
+				let xRepeatButtons = xDiv + widthDiv * 0.66 - widthButtons*0.5;
+				let xMenuButtons = xDiv + widthDiv * 0.33 - widthButtons*0.5;
+				for (let item of this.objectRegister.Button) {
+					if (item instanceof MenuButton) {
+						this.drawButton(item, imgButtons, xMenuButtons, yButtons, widthButtons, heightButtons, "Меню");
+					} else if (item instanceof RepeatButton) {
+						this.drawButton(item, imgButtons, xRepeatButtons, yButtons, widthButtons, heightButtons, "Повтор");
+					}
+				}
+				//Draw Lose
+				let widthLoseImage = widthDiv;
+				let heightLoseImage = widthLoseImage * 0.3;
+				let xLoseImage = xDiv;
+				let yLoseImage = yDiv - heightLoseImage;
+				let imgLoseImage = this._images.Lose[0];
+				this._ctxCanvas.drawImage(imgLoseImage, xLoseImage, yLoseImage, widthLoseImage, heightLoseImage);
+				resolve("Finish View.drawWin()");
+			});
+		});
+		this._drawPromise = newPromise;
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");

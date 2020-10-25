@@ -14,8 +14,9 @@ function main() {
 		"Button" : ["PauseButton.png","Button1.png"],
 		"Background" : ["Background.jpg"],
 		"Progress" : ["BackgroundProgress.png"],
-		"PanelScope": ["PanelScope.png"],
-		"Win" : ["Win.png"]
+		"PanelScope" : ["PanelScope.png"],
+		"Win" : ["Win.png"],
+		"Lose" : ["GameOver.png"]
 	};
 	//This register will use all our classes
 	//It containes all game objects

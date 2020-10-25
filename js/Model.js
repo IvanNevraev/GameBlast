@@ -149,11 +149,14 @@ class Game {
 			});
 			this.amountTilesForBlast = 9999;
 			this._view.facade({
-				"buildeWin" : "Win"
+				"drawWin" : "Win"
 			});
 		} else if (this.moves <= 0){
 			console.log("--------LOSE--------");
 			this.amountTilesForBlast = 9999;
+			this._view.facade({
+				"drawLose" : "Lose"
+			});
         }
 	}
 	createButtons() {
