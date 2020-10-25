@@ -10,6 +10,7 @@ class Game {
 	amountTilesForBlast = 2;
 	amountTilesInWidth = 5;
 	amountTilesInHeight = 5;
+	amountMixing = 2;
 	level = 0;    
 	points = 0;
 	goal = 0;    //level*1000
@@ -34,7 +35,7 @@ class Game {
 		console.log(this);
 	}
 	buildeGame() {
-		this.buildeLevel(1);
+		this.buildeLevel(5);
 		this.createButtons();
     }
 	buildeLevel(level) {
@@ -42,7 +43,7 @@ class Game {
 		this.level = level;
 		this.goal = level * 1000;
 		this.moves = 50 - (level * 2);
-		this.amountTilesForBlast = level + 1;
+		this.amountTilesForBlast = level + 1 + 5;
 		this.points = 0;
 		this.progress = 0;
 		//Amount colors level/2 but from 2 to 5
@@ -56,9 +57,15 @@ class Game {
 		addres.points = 0;
 		addres.progress = 0;
 		this.createNewField();
-		this._view.facade({
-			"drawLevel": []
-		});
+		if (this.checkPossibleBlast(this.objectRegister.Field[0], this.amountTilesForBlast)) {
+			console.log("ALL OK START LEVEl");
+			this._view.facade({
+				"drawLevel": []
+			});
+		} else {
+			console.log("NO AVAILABLE FOR BLAST");
+			this.buildeLevel(level);
+		}
 	}
 	buildePause() {
 		console.log("Start Model.buildePause()");
@@ -143,6 +150,25 @@ class Game {
 	}
 	checkEndGame() {
 		console.log("Start Model.checkEndGame()");
+		let canDoNextMove = false;
+		if (this.checkPossibleBlast(this.objectRegister.Field[0], this.amountTilesForBlast)) {
+			console.log("ALL OK CAN DO NEXT MOVE");
+			
+		} else {
+			console.warn("NO AVAILABLE FOR BLAST");
+			for (let i = 0; i < this.amountMixing; i++) {
+				let copyField = this.copyField(this.objectRegister.Field[0]);
+				this._view.facade({
+					"mixTiles": copyField
+				});
+				if (this.checkPossibleBlast(this.objectRegister.Field[0], this.amountTilesForBlast)) {
+					i = this.amountMixing;
+					canDoNextMove = true;
+                }
+			}
+
+		}
+		//-------------------------------------
 		if (this.points >= this.goal) {
 			console.log("--------WINS--------");
 			this._view.facade({
@@ -152,7 +178,7 @@ class Game {
 			this._view.facade({
 				"drawWin" : "Win"
 			});
-		} else if (this.moves <= 0){
+		} else if (this.moves <= 0 && !canDoNextMove) {
 			console.log("--------LOSE--------");
 			this.amountTilesForBlast = 9999;
 			this._view.facade({
@@ -220,6 +246,21 @@ class Game {
 
 		return arrayTiles;
 	}
+	copyField(field) {
+		let matrixOriginField = field._matrixOfTiles;
+		let copyField = new Field(matrixOriginField[0].length, matrixOriginField.length);
+		for (let i = 0; i < copyField._matrixOfTiles.length; i++) {
+			for (let k = 0; k < copyField._matrixOfTiles[i].length; k++) {
+				let originTile = matrixOriginField[i][k];
+				let originColor = originTile._color;
+				copyField._matrixOfTiles[i][k] = new Tile(i + " " + k, originColor, copyField, i, k);
+				copyField._matrixOfTiles[i][k].proto = originTile;
+				copyField._matrixOfTiles[i][k].X = originTile.X;
+				copyField._matrixOfTiles[i][k].Y = originTile.Y;
+			}
+		}
+		return copyField;
+    }
 	testing() {
 		//Test-------------------
 		let testField = this.objectRegister.Field[0];
@@ -272,8 +313,14 @@ class Field extends Obj{
 			for (let k = 0; k < this._matrixOfTiles[i].length; k++){
 				if (this._matrixOfTiles[i][k] == null) {
 					continue;
-                }
+				}
+				this._matrixOfTiles[i][k].row = i;
+				this._matrixOfTiles[i][k].column = k;
 				this._matrixOfTiles[i][k].isCounted = false;
+				this._matrixOfTiles[i][k].leftTile = null;
+				this._matrixOfTiles[i][k].upTile = null;
+				this._matrixOfTiles[i][k].rightTile = null;
+				this._matrixOfTiles[i][k].bottomTile = null;
 				if(k-1>=0){
 					this._matrixOfTiles[i][k].leftTile = this._matrixOfTiles[i][k-1];
 				}
@@ -335,6 +382,49 @@ class Field extends Obj{
                 }
 			}
 		}
+		this.linkTiles();
+		return this._matrixOfTiles;
+	}
+	mixTiles() {
+		console.log("Start Field.mixTiles");
+		let arrayTiles = new Array();
+		for (let i = 0; i < this._matrixOfTiles.length; i++) {
+			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+				arrayTiles.push(this._matrixOfTiles[i][k]);
+            }
+		}
+		let j = 0;
+		for (let i = 0; i < this._matrixOfTiles.length; i++) {
+			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+				let index = 0;
+				if (j % 2 == 0) {
+					index = arrayTiles.length - j - 1;
+				} else {
+					index = j;
+				}
+				this._matrixOfTiles[i][k] = arrayTiles[index];
+				j++;
+			}
+		}
+		//Check new matrix
+		let errorFlag = false;
+		for (let i = 0; i < this._matrixOfTiles.length; i++) {
+			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+				if (arrayTiles.indexOf(this._matrixOfTiles[i][k]) == -1) {
+					console.warn("Error mix tiles! Field.mixTile()");
+					errorFlag = true;
+                }
+			}
+		}
+		if (errorFlag) {
+			let x = 0;
+			for (let i = 0; i < this._matrixOfTiles.length; i++) {
+				for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+					this._matrixOfTiles[i][k] = arrayTiles[x];
+					x++;
+				}
+			}
+        }
 		this.linkTiles();
 		return this._matrixOfTiles;
     }

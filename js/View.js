@@ -167,6 +167,8 @@
 					this.drawWin();
 				} else if (key == "drawLose") {
 					this.drawLose();
+				} else if (key == "mixTiles") {
+					this.mixTiles(object[key]);
                 }
 			}
 		}, (reject) => { });
@@ -342,6 +344,83 @@
 		});
 		this._drawPromise = newPromise;
 	}
+	mixTiles(copyField) {
+		let k = 0;
+		let kd = 0;
+		let delay = 20;
+		let cadrs = 60;
+		let newPromise = this._drawPromise.then((resolve) => {
+			console.log(resolve);
+			return new Promise((resolve, reject) => {
+				console.log("Start View.mixTiles()");
+				this.objectRegister.isControled = false;
+				let newMatrix = copyField.mixTiles();
+				let array = new Array();
+				matrixToLineArray(newMatrix,array);
+				let tileForMix = new Array();
+				for (let newPositionTile of array) {
+					if (newPositionTile == null) {
+						continue;
+					}
+					let lastPositionTile = this.findProto(newPositionTile.proto);
+					let startRow = lastPositionTile.row;
+					let newRow = newPositionTile.row;
+					let startY = lastPositionTile.Y;
+					let newY = startY + (newRow - startRow) * lastPositionTile.height;
+					let startColumn = lastPositionTile.column;
+					let newColumn = newPositionTile.column;
+					let startX = lastPositionTile.X;
+					let newX = startX + (newColumn - startColumn) * lastPositionTile.width;
+					lastPositionTile.row = newRow;
+					tileForMix.push({
+						"copyTile": lastPositionTile,
+						"startRow": startRow,
+						"finishRow": newRow,
+						"startY": startY,
+						"finishY": newY,
+						"startColumn": startColumn,
+						"finishColumn": newColumn,
+						"startX": startX,
+						"finishX": newX,
+					});
+					newPositionTile.row = newRow;
+					newPositionTile.Y = newY;
+					newPositionTile.column = newColumn;
+					newPositionTile.X = newX;
+				}
+				for (let i = 0; i < cadrs; i++) {
+					setTimeout(() => {
+						this.drawField(this.preState.Field[0], this.preState.Field[0].Z);
+						for (let item of tileForMix) {
+							let deltaY = (item.finishY - item.startY) / cadrs;
+							let deltaX = (item.finishX - item.startX) / cadrs;
+							item.copyTile.Y = item.copyTile.Y + deltaY;
+							item.copyTile.X = item.copyTile.X + deltaX;
+							this.drawImage(item.copyTile);
+						}
+						kd++;
+						if (kd == k) {
+							//Update parametrs to origin field
+							let originMatrix = this.objectRegister.Field[0].mixTiles();
+							for (let i = 0; i < originMatrix.length; i++) {
+								for (let k = 0; k < originMatrix[i].length; k++) {
+									originMatrix[i][k].X = newMatrix[i][k].X;
+									originMatrix[i][k].Y = newMatrix[i][k].Y;
+                                }
+                            }
+							//----------------------------------
+							this.saveState();
+							this.objectRegister.isControled = true;
+							resolve("Finish View.mixTiles()");
+						}
+					}, delay * i);
+					k++;
+				}
+				
+			});
+		});
+		this._drawPromise = newPromise;
+    }
 	drawBackground() {
 		console.log("Start View.drawBackground()");
 		this._ctxCanvas.drawImage(this._images.Background[0], 0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
