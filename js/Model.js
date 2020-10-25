@@ -82,9 +82,10 @@ class Game {
 		//{"What will we do" : arrayOfChangetObjects}
 		for(let key in object){
 			if (key == "clickOnTile") {
-				if (object[key].length >= this.amountTilesForBlast) {
-					this.blastTiles(object[key]);
-					this.countParametersOfLevel(object[key]);
+				let arrayTiles = this.getArrayTilesWithSameColor(object[key]);
+				if (arrayTiles.length >= this.amountTilesForBlast) {
+					this.blastTiles(arrayTiles);
+					this.countParametersOfLevel(arrayTiles);
 				}
 			} else if (key == "clickOnPauseButton") {
 				this.buildePause();
@@ -159,11 +160,74 @@ class Game {
 			});
         }
 	}
+	checkPossibleBlast(field,amountTileForBlust=2) {
+		//Return true or false for possibility a move
+		let matrix = field._matrixOfTiles;
+		for (let i = 0; i < matrix.length; i++) {
+			for (let k = 0; k < matrix[i].length; k++) {
+				let arrayTiles = this.getArrayTilesWithSameColor(matrix[i][k]);
+				let amount = arrayTiles.length;
+				if (amount >= amountTileForBlust) {
+					return true;
+                }
+            }
+		}
+		return false;
+
+    }
 	createButtons() {
 		this.objectRegister.Button.push(new PauseButton("pauseButton1"));
 		this.objectRegister.Button.push(new NextButton("nextButton1"));
 		this.objectRegister.Button.push(new RepeatButton("repeatButton1"));
 		this.objectRegister.Button.push(new MenuButton("menuButton1"));
+	}
+	getArrayTilesWithSameColor(tile) {
+		console.log("Start Controler.getArrayTilesWithSameColor()");
+		/*
+		The recursive method is based on the "raised hand" principle.
+		When a method is called for a neighboring tile of similar color,
+		it puts itself in the array and "lowers its hand".
+		*/
+		let arrayTiles = new Array();
+		this.getArrayTilesWithSameColorRec(tile, arrayTiles);
+		tile._field.linkTiles();
+		return arrayTiles;
+	}
+	getArrayTilesWithSameColorRec(tile, arrayTiles) {
+		tile.isCounted = true;
+		arrayTiles.push(tile);
+		let idColor = tile._color;
+		if (tile.leftTile != null && tile.leftTile.isCounted == false) {
+			if (idColor == tile.leftTile._color) {
+				this.getArrayTilesWithSameColorRec(tile.leftTile, arrayTiles);
+			}
+		}
+		if (tile.upTile != null && tile.upTile.isCounted == false) {
+			if (idColor == tile.upTile._color) {
+				this.getArrayTilesWithSameColorRec(tile.upTile, arrayTiles);
+			}
+		}
+		if (tile.rightTile != null && tile.rightTile.isCounted == false) {
+			if (idColor == tile.rightTile._color) {
+				this.getArrayTilesWithSameColorRec(tile.rightTile, arrayTiles);
+			}
+		}
+		if (tile.bottomTile != null && tile.bottomTile.isCounted == false) {
+			if (idColor == tile.bottomTile._color) {
+				this.getArrayTilesWithSameColorRec(tile.bottomTile, arrayTiles);
+			}
+		}
+
+		return arrayTiles;
+	}
+	testing() {
+		//Test-------------------
+		let testField = this.objectRegister.Field[0];
+		for (let i = 0; i < 40; i++) {
+			let bool = this.checkPossibleBlast(testField, i);
+			console.log(i + ": " + bool);
+		}
+		//Test--------------------
     }
 }
 class Obj {

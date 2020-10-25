@@ -40,7 +40,7 @@ class Controller {
         if (object instanceof Tile) {
             //Call the facade of the Game class
             this._game.facade({
-                "clickOnTile": this.getArrayTilesWithSameColor(object)
+                "clickOnTile": object
             });
         } else if (object instanceof PauseButton) {
             this._game.facade({
@@ -59,44 +59,5 @@ class Controller {
                 "clickOnNextButton": object
             });
         }
-    }
-    getArrayTilesWithSameColor(tile) {
-        console.log("Start Controler.getArrayTilesWithSameColor()");
-		/*
-		The recursive method is based on the "raised hand" principle.
-		When a method is called for a neighboring tile of similar color,
-		it puts itself in the array and "lowers its hand".
-		*/
-		let arrayTiles = new Array();
-		this.getArrayTilesWithSameColorRec(tile,arrayTiles);
-		tile._field.linkTiles();
-		return arrayTiles;
-	}
-    getArrayTilesWithSameColorRec(tile,arrayTiles) {
-		tile.isCounted = true;
-		arrayTiles.push(tile);
-        let idColor = tile._color;
-        if (tile.leftTile != null&&tile.leftTile.isCounted==false) {
-            if (idColor == tile.leftTile._color) {
-                this.getArrayTilesWithSameColorRec(tile.leftTile,arrayTiles);
-            }
-        }
-        if (tile.upTile != null&&tile.upTile.isCounted==false) {
-            if (idColor == tile.upTile._color) {
-                this.getArrayTilesWithSameColorRec(tile.upTile,arrayTiles);
-            }
-        }
-        if (tile.rightTile != null&&tile.rightTile.isCounted==false) {
-            if (idColor == tile.rightTile._color) {
-                this.getArrayTilesWithSameColorRec(tile.rightTile,arrayTiles);
-            }
-        }
-        if (tile.bottomTile != null&&tile.bottomTile.isCounted==false) {
-            if (idColor == tile.bottomTile._color) {
-                this.getArrayTilesWithSameColorRec(tile.bottomTile,arrayTiles);
-            }
-        }
-
-        return arrayTiles;
     }
 }
