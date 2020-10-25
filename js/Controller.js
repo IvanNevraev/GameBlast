@@ -46,6 +46,10 @@ class Controller {
             this._game.facade({
                 "clickOnPauseButton": object
             });
+        } else if (object instanceof MenuButton) {
+            this, this._game.facade({
+                "clickOnMenuButton": object
+            });
         }
     }
     getArrayTilesWithSameColor(tile) {

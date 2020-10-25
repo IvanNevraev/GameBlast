@@ -350,43 +350,42 @@
 		percent = percent > 100 ? 100 : percent;
 		let widthWindow = document.documentElement.clientWidth;
 		let heightWindow = document.documentElement.clientHeight;
-		let WBP;
-		let HBP;
-		let XBP;
-		let YBP;
+		let widthBackgroundProgress;
+		let heightBackgroundProgress;
+		let xBackgroundProgress;
+		let yBackgroundProgress;
 		if (widthWindow >= heightWindow) {
-			HBP = heightWindow * 0.2 - 40;
-			WBP = HBP*3.5;
-			XBP = (widthWindow/2) -(WBP/2);
-			YBP = 30;
+			heightBackgroundProgress = heightWindow * 0.2 - 40;
+			widthBackgroundProgress = heightBackgroundProgress*3.5;
+			xBackgroundProgress = (widthWindow/2) -(widthBackgroundProgress/2);
+			yBackgroundProgress = 30;
 		} else {
-			WBP = widthWindow * 0.6;
-			HBP = heightWindow * 0.2 - 40;
-			XBP = widthWindow * 0.2;
-			YBP = 20;
+			widthBackgroundProgress = widthWindow * 0.6;
+			heightBackgroundProgress = heightWindow * 0.2 - 40;
+			xBackgroundProgress = widthWindow * 0.2;
+			yBackgroundProgress = 20;
         }
-		let IBP = this._images.Progress[0];
-		this._ctxCanvas.drawImage(IBP, XBP, YBP, WBP, HBP);
-		let barProgress = new Obj();
-		let fullFill = WBP * 0.853;
+		let imageBackgroundProgress = this._images.Progress[0];
+		this._ctxCanvas.drawImage(imageBackgroundProgress, xBackgroundProgress, yBackgroundProgress, widthBackgroundProgress, heightBackgroundProgress);
+		let fullFillBarProgress = widthBackgroundProgress * 0.853;
 
 		//Draw progress bar
-		let width = fullFill * percent/100;
-		let height = HBP * 0.23;
-		let x = XBP + WBP * 0.072;
-		let y = YBP + HBP * 0.6;
-		let gr = this._ctxCanvas.createLinearGradient(x + (width / 2), y, x + (width / 2), y + height);
+		let width = fullFillBarProgress * percent/100;
+		let height = heightBackgroundProgress * 0.23;
+		let xBar = xBackgroundProgress + widthBackgroundProgress * 0.072;
+		let yBar = yBackgroundProgress + heightBackgroundProgress * 0.6;
+		let gr = this._ctxCanvas.createLinearGradient(xBar + (width / 2), yBar, xBar + (width / 2), yBar + height);
 		gr.addColorStop(0.0, '#b2ff74');
 		gr.addColorStop(0.5, '#069f00');
 		gr.addColorStop(0.7, '#069f00');
 		gr.addColorStop(1.0, '#b2ff74');
 		this._ctxCanvas.fillStyle = gr;
 		this._ctxCanvas.beginPath();
-		this._ctxCanvas.moveTo(x, y);
-		this._ctxCanvas.lineTo(x + width, y);
-		this._ctxCanvas.arc(x + width, y + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, false);
-		this._ctxCanvas.lineTo(x, y + height);
-		this._ctxCanvas.arc(x, y + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, true);
+		this._ctxCanvas.moveTo(xBar, yBar);
+		this._ctxCanvas.lineTo(xBar + width, yBar);
+		this._ctxCanvas.arc(xBar + width, yBar + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, false);
+		this._ctxCanvas.lineTo(xBar, yBar + height);
+		this._ctxCanvas.arc(xBar, yBar + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, true);
 		this._ctxCanvas.closePath();
 		this._ctxCanvas.fill();
 	}
@@ -395,52 +394,53 @@
 		let heightWindow = document.documentElement.clientHeight;
 		let widthInTiles = this.objectRegister.ParametersOfGame.widthInTiles;
 		let heightInTiles = this.objectRegister.ParametersOfGame.heightInTiles;
-		let width;
-		let height;
-		let x;
-		let y;
+		let widthPanel;
+		let heightPanel;
+		let xPanel;
+		let yPanel;
 		if (widthInTiles == heightInTiles) {
 			if (widthWindow > heightWindow) {
-				height = width = (widthWindow * 0.5) - (heightWindow * 0.3) - 20;
-				x = (widthWindow * 0.5) + (heightWindow * 0.3) + 10;
-				y = (heightWindow * 0.5) - (height * 0.5);
+				heightPanel = widthPanel = (widthWindow * 0.5) - (heightWindow * 0.3) - 20;
+				heightPanel = widthPanel = heightPanel > heightWindow * 0.6 ? heightWindow * 0.6 : heightPanel;
+				xPanel = (widthWindow * 0.5) + (heightWindow * 0.3) + 10;
+				yPanel = (heightWindow * 0.5) - (heightPanel * 0.5);
 
 			} else {
-				width = height = widthWindow * 0.2;
-				x = (widthWindow * 0.9) - (width * 0.5);
-				y = (heightWindow * 0.2) + (widthWindow * 0.3) - (height * 0.5);
+				widthPanel = heightPanel = widthWindow * 0.2;
+				xPanel = (widthWindow * 0.9) - (widthPanel * 0.5);
+				yPanel = (heightWindow * 0.2) + (widthWindow * 0.3) - (heightPanel * 0.5);
 			}
 		} else if (widthInTiles > heightInTiles) {
-			height = width = (widthWindow * 0.2) - 20;
-			x = (widthWindow * 0.9) - (width * 0.5);
-			y = (heightWindow * 0.2) + widthWindow * 0.6 * (heightInTiles / widthInTiles) * 0.5 - (height * 0.5);
+			heightPanel = widthPanel = (widthWindow * 0.2) - 20;
+			xPanel = (widthWindow * 0.9) - (widthPanel * 0.5);
+			yPanel = (heightWindow * 0.2) + widthWindow * 0.6 * (heightInTiles / widthInTiles) * 0.5 - (heightPanel * 0.5);
 		} else {
-			height = width = (widthWindow - ((widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5)) - 15;
-			height = width = height > heightWindow * 0.6 ? heightWindow * 0.6 : height;
-			x = (widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5 + 10;
-			y = (heightWindow * 0.5) - (height * 0.5);
+			heightPanel = widthPanel = (widthWindow - ((widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5)) - 15;
+			heightPanel = widthPanel = heightPanel > heightWindow * 0.6 ? heightWindow * 0.6 : heightPanel;
+			xPanel = (widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5 + 10;
+			yPanel = (heightWindow * 0.5) - (heightPanel * 0.5);
         }
-		let img = this._images.PanelScope[0];
-		this._ctxCanvas.drawImage(img, x, y, width, height);
+		let imagePanel = this._images.PanelScope[0];
+		this._ctxCanvas.drawImage(imagePanel, xPanel, yPanel, widthPanel, heightPanel);
 		//Draw text
 		this._ctxCanvas.fillStyle = "white";
 		this._ctxCanvas.textAlign = "center";
-		//Draw points
-		let xPoints = x + width * 0.5;
-		let yPoints = y + height * 0.86;
-		let fontSizePoints = height * 0.1;
+		//Draw points text
+		let xPoints = xPanel + widthPanel * 0.5;
+		let yPoints = yPanel + heightPanel * 0.86;
+		let fontSizePoints = heightPanel * 0.1;
 		this._ctxCanvas.font = fontSizePoints+"px Comic Sans MS";
 		this._ctxCanvas.fillText(points, xPoints, yPoints);
-		//Dravw moves
-		let xMoves = x + width * 0.5;
-		let yMoves = y + height * 0.47;
-		let fontSizeMoves = height * 0.2;
+		//Dravw moves text
+		let xMoves = xPanel + widthPanel * 0.5;
+		let yMoves = yPanel + heightPanel * 0.47;
+		let fontSizeMoves = heightPanel * 0.2;
 		this._ctxCanvas.font = fontSizeMoves + "px Comic Sans MS";
 		this._ctxCanvas.fillText(moves, xMoves, yMoves);
-		//Draew level
-		let xLevel = x + width * 0.5;
-		let yLevel = y + height * 0.09;
-		let fontSizeLevel = height * 0.095;
+		//Draew level text
+		let xLevel = xPanel + widthPanel * 0.5;
+		let yLevel = yPanel + heightPanel * 0.09;
+		let fontSizeLevel = heightPanel * 0.095;
 		this._ctxCanvas.font = fontSizeLevel + "px Comic Sans MS";
 		this._ctxCanvas.fillStyle = "black";
 		this._ctxCanvas.fillText("Уровень " + level, xLevel, yLevel);
@@ -449,27 +449,64 @@
 	drawWin() {
 		let widthWindow = document.documentElement.clientWidth;
 		let heightWindow = document.documentElement.clientHeight;
-		//Draw background field
-		let wB = widthWindow * 0.6;
-		let hB = wB * 0.3;
-		let xB = widthWindow * 0.5 - wB * 0.5;
-		let yB = heightWindow * 0.5;
-		let imgB = this._images.Field[0];
-		this._ctxCanvas.drawImage(imgB, xB, yB, wB, hB);
-		//Draw butoon menu
-		let wM = widthWindow * 0.6;
-		let hM = wB * 0.3;
-		let xM = widthWindow * 0.5 - wB * 0.5;
-		let yM = heightWindow * 0.5;
-		let imgM = this._images.Field[0];
-		this._ctxCanvas.drawImage(imgM, xM, yM, wM, hM);
+		//Draw div
+		let widthDiv = widthWindow * 0.6;
+		let heightImage = widthDiv * 1.5; //This is all height image div + a image of win
+		let heightDiv = widthDiv * 0.3;
+		if (heightImage > heightWindow) {
+			heightDiv = heightWindow*0.3;
+			widthDiv = heightDiv / 0.3;
+        }
+		let xDiv = widthWindow * 0.5 - widthDiv * 0.5;
+		let yDiv = heightWindow * 0.5;
+		if (widthWindow < heightWindow) {
+			yDiv = widthWindow * 0.6;
+        }
+		let imgDiv = this._images.Field[0];
+		this._ctxCanvas.drawImage(imgDiv, xDiv, yDiv, widthDiv, heightDiv);
+		//Draw butoons
+		let widthButtons = widthDiv*0.28;
+		let heightButtons = heightDiv * 0.4;
+		let yButtons = yDiv + heightDiv * 0.5 - heightButtons * 0.5;
+		let imgButtons = this._images.Button[1];
+		let xRepeatButtons = xDiv + widthDiv*0.5 - widthButtons*0.5;
+		let xMenuButtons = xRepeatButtons - widthButtons - widthDiv*0.02;
+		let xNextButtons = xRepeatButtons + widthButtons + widthDiv*0.02;
+		for (let item of this.objectRegister.Button) {
+			if (item instanceof MenuButton) {
+				this.drawButton(item, imgButtons, xMenuButtons, yButtons, widthButtons, heightButtons, "Меню");
+			} else if (item instanceof RepeatButton) {
+				this.drawButton(item, imgButtons, xRepeatButtons, yButtons, widthButtons, heightButtons, "Повтор");
+			} else if (item instanceof NextButton) {
+				this.drawButton(item, imgButtons, xNextButtons, yButtons, widthButtons, heightButtons, "Вперед");
+            }
+        }
 		//Draw WIN
-		let width = widthWindow * 0.8;
-		let height = heightWindow * 0.8;
-		let x = widthWindow * 0.5 - width * 0.5;
-		let y = yB - height*0.66;
-		let img = this._images.Win[0];
+		let widthWinImage = widthDiv*1.2;
+		let heightWinImage = widthWinImage;
+		let xWinImage = widthWindow * 0.5 - widthWinImage * 0.5;
+		let yWinImage = yDiv - heightWinImage*0.66;
+		let imgWinImage = this._images.Win[0];
+		this._ctxCanvas.drawImage(imgWinImage, xWinImage, yWinImage, widthWinImage, heightWinImage);
+	}
+	drawButton(object = null, img = null, x = 0, y = 0, width = 0, height = 0, text = "") {
+		object.X = x;
+		object.Y = y;
+		object.width = width;
+		object.height = height;
+		object.img = img;
 		this._ctxCanvas.drawImage(img, x, y, width, height);
+		//Draw text
+		let xT = x + width * 0.5;
+		let yT = y + height * 0.5;
+		let fontSizeT = height * 0.6;
+		this._ctxCanvas.font = fontSizeT + "px Comic Sans MS";
+		this._ctxCanvas.fillStyle = "white";
+		this._ctxCanvas.textAlign = "center";
+		this._ctxCanvas.textBaseline = "middle";
+		this._ctxCanvas.fillText(text, xT, yT);
+
+
     }
 	checkParameters() {
 		console.log("Start View.checkParameters()");

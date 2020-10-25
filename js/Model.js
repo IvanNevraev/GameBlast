@@ -38,6 +38,7 @@ class Game {
 		this.level = level;
 		this.goal = level * 1000;
 		this.moves = 50 - (level * 2);
+		this.amountTilesForBlast = level + 1 + 999;
 		//Amount colors level/2 but from 2 to 5
 		let amountColors = Math.round(level / 2);
 		this.amountWariablesColors = amountColors < 2 ? 2 : (amountColors > 5 ? 5 : amountColors);
@@ -52,6 +53,9 @@ class Game {
 	}
 	buildePause() {
 		console.log("Start Model.buildePause()");
+	}
+	buildeLobby() {
+		console.log("Start Model.buildeLobby()");
     }
 	createNewField() {
 		//Create new field
@@ -75,6 +79,8 @@ class Game {
 				}
 			} else if (key == "clickOnPauseButton") {
 				this.buildePause();
+			} else if (key == "clickOnMenuButton") {
+				this.buildeLobby();
             }
 		}
 	}
@@ -284,16 +290,16 @@ class PauseButton extends Button {
 }
 class NextButton extends Button {
 	constructor(id) {
-		supper(id);
+		super(id);
     }
 }
 class RepeatButton extends Button {
 	constructor(id) {
-		supper(id);
+		super(id);
 	}
 }
 class MenuButton extends Button {
 	constructor(id) {
-		supper(id);
+		super(id);
 	}
 }
