@@ -61,6 +61,7 @@
 		this.drawPauseButton();
 		this.drawProgress();
 		this.drawPanelScope(addres.points, addres.moves, addres.level);
+		this.drawBonusArea();
 		this.drawField(this.objectRegister.Field[0], 1);
 		this.drawAllTiles(this.objectRegister.Tile, 50);
 		let newPromise = this._drawPromise.then((resolve) => {
@@ -553,6 +554,57 @@
 		this._ctxCanvas.fillText("Уровень " + level, xLevel, yLevel);
 
 	}
+	drawBonusArea() {
+		let widthWindow = document.documentElement.clientWidth;
+		let heightWindow = document.documentElement.clientHeight;
+		let widthInTiles = this.objectRegister.ParametersOfGame.widthInTiles;
+		let heightInTiles = this.objectRegister.ParametersOfGame.heightInTiles;
+		let widthArea;
+		let heightArea;
+		let xArea;
+		let yArea;
+		if (widthInTiles == heightInTiles) {
+			if (widthWindow > heightWindow) {
+				heightArea = widthArea = (widthWindow * 0.5) - (heightWindow * 0.3) - 20;
+				heightArea = widthArea = heightArea > heightWindow * 0.6 ? heightWindow * 0.6 : heightArea;
+				xArea = (widthWindow * 0.5) - (heightWindow * 0.3) - 10 - widthArea;
+				yArea = (heightWindow * 0.5) - (heightArea * 0.5);
+
+			} else {
+				widthArea = heightArea = widthWindow * 0.2;
+				xArea = widthWindow * 0.005;
+				yArea = (heightWindow * 0.2) + (widthWindow * 0.3) - (heightArea * 0.5);
+			}
+		} else if (widthInTiles > heightInTiles) {
+			heightArea = widthArea = (widthWindow * 0.2) - 20;
+			xArea = widthWindow * 0.005;
+			yArea = (heightWindow * 0.2) + widthWindow * 0.6 * (heightInTiles / widthInTiles) * 0.5 - (heightArea * 0.5);
+		} else {
+			heightArea = widthArea = (widthWindow - ((widthWindow * 0.5) + heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5)) - 15;
+			heightArea = widthArea = heightArea > heightWindow * 0.6 ? heightWindow * 0.6 : heightArea;
+			xArea = (widthWindow * 0.5) - heightWindow * 0.6 * (widthInTiles / heightInTiles) * 0.5 - 10 - widthArea;
+			yArea = (heightWindow * 0.5) - (heightArea * 0.5);
+		}
+
+		let imgBonusBackground = this._images.Bonus[0];
+		let imgBonusText = this._images.Bonus[1];
+		//Draw text on up place
+		let widthBonusText = widthArea * 0.8;
+		let heightBonusText = widthBonusText * 0.2;
+		let xBonusText = xArea + widthArea * 0.5 - widthBonusText * 0.5;
+		let yBonusText = yArea;
+		this._ctxCanvas.drawImage(imgBonusText, xBonusText, yBonusText, widthBonusText, heightBonusText);
+		//Draw button mix bonus
+		let margin = heightArea * 0.05;
+		let widthButton = widthArea * 0.3;
+		let heightButton = widthButton;
+		let xButton = xArea + widthArea * 0.5 - widthButton*0.5;
+		//------------------------------------
+		let yButtonMix = yBonusText + heightBonusText + margin;
+		let yButtonBang = yButtonMix + heightButton + margin;
+		this.drawButton(this.findeButtonById("mix"), imgBonusBackground, xButton, yButtonMix, widthButton, heightButton, "M");
+		this.drawButton(this.findeButtonById("bang"), imgBonusBackground, xButton, yButtonBang, widthButton, heightButton, "B");
+    }
 	drawWin() {
 		let newPromise = this._drawPromise.then((resolve) => {
 			console.log(resolve);

@@ -15,7 +15,8 @@ function main() {
 		"Progress" : ["BackgroundProgress.png"],
 		"PanelScope" : ["PanelScope.png"],
 		"Win" : ["Win.png"],
-		"Lose" : ["GameOver.png"]
+		"Lose": ["GameOver.png"],
+		"Bonus" : ["BonusBackground.png","BonusText.png"]
 	};
 	//This register will use all our classes
 	//It containes all game objects

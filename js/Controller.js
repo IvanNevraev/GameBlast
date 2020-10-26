@@ -66,6 +66,10 @@ class Controller {
             this._game.facade({
                 "clickOnLevelButton": object
             });
+        } else if (object instanceof BonusButton) {
+            this._game.facade({
+                "clickOnBonusButton": object
+            });
         }
     }
 }

@@ -117,7 +117,15 @@ class Game {
 				});
 			} else if (key == "clickOnLevelButton") {
 				this.buildeLevel(object[key]._id);
-            }
+			} else if (key == "clickOnBonusButton") {
+				if (object[key]._id == "mix") {
+					let copyField = this.copyField(this.objectRegister.Field[0]);
+					let newMatrix = copyField.mixTiles();
+					this._view.facade({
+						"mixTiles": newMatrix
+					});
+                }
+			}
 		}
 	}
 	blastTiles(arrayTiles) {
@@ -231,6 +239,8 @@ class Game {
 		for(let i=1; i<13; i++){
 			this.objectRegister.Button.push(new LevelButton(i));
 		}
+		this.objectRegister.Button.push(new BonusButton("mix"));
+		this.objectRegister.Button.push(new BonusButton("bang"));
 	}
 	getArrayTilesWithSameColor(tile) {
 		console.log("Start Controler.getArrayTilesWithSameColor()");
@@ -520,4 +530,9 @@ class LevelButton extends Button {
 	constructor(id){
 		super(id);
 	}
+}
+class BonusButton extends Button {
+	constructor(id) {
+		super(id);
+    }
 }
