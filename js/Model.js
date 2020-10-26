@@ -35,19 +35,22 @@ class Game {
 		console.log(this);
 	}
 	buildeGame() {
-		this.buildeLevel(5);
 		this.createButtons();
+		this._view.facade({
+			"drawLobby" : " "
+		});
     }
 	buildeLevel(level) {
 		console.log("Start Model.buildeLevel()");
 		this.level = level;
 		this.goal = level * 1000;
 		this.moves = 50 - (level * 2);
-		this.amountTilesForBlast = level + 1 + 5;
+		this.amountTilesForBlast = (level + 1) <= 6 ? (level + 1) : 6;
 		this.points = 0;
 		this.progress = 0;
 		//Amount colors level/2 but from 2 to 5
-		let amountColors = Math.round(level / 2);
+		//let amountColors = Math.round(level / 2);
+		let amountColors = level + 1;
 		this.amountWariablesColors = amountColors < 2 ? 2 : (amountColors > 5 ? 5 : amountColors);
 		let addres = this.objectRegister.ParametersOfGame
 		addres.widthInTiles = this.amountTilesInWidth = 4 + level;
@@ -59,6 +62,7 @@ class Game {
 		this.createNewField();
 		if (this.checkPossibleBlast(this.objectRegister.Field[0], this.amountTilesForBlast)) {
 			console.log("ALL OK START LEVEl");
+			alert("Количество тайлов доступных для сжигания " + this.amountTilesForBlast + " и более!");
 			this._view.facade({
 				"drawLevel": []
 			});
@@ -66,9 +70,6 @@ class Game {
 			console.log("NO AVAILABLE FOR BLAST");
 			this.buildeLevel(level);
 		}
-	}
-	buildePause() {
-		console.log("Start Model.buildePause()");
 	}
 	buildeLobby() {
 		console.log("Start Model.buildeLobby()");
@@ -80,6 +81,7 @@ class Game {
 		this.objectRegister.Field[0] = field;
 		//Call field`s method for create new tiles
 		//Link these tiles with register
+		this.objectRegister.Tile = new Array();
 		matrixToLineArray(field.craeteTiles(this.amountWariablesColors), this.objectRegister.Tile);
 		//Call field`s method for link tiles each other
 		field.linkTiles();
@@ -95,13 +97,26 @@ class Game {
 					this.countParametersOfLevel(arrayTiles);
 				}
 			} else if (key == "clickOnPauseButton") {
-				this.buildePause();
+				this.amountTilesForBlast = 9999999;
+				this._view.facade({
+					"drawPauseMenu": " "
+				});
 			} else if (key == "clickOnMenuButton") {
-				this.buildeLobby();
+				this.amountTilesForBlast = 9999999;
+				this._view.facade({
+					"drawLobby": " "
+				});
 			} else if (key == "ckickOnRepeatButton") {
 				this.buildeLevel(this.level);
 			} else if (key == "clickOnNextButton") {
 				this.buildeLevel(++this.level);
+			} else if (key == "clickOnContinueButton") {
+				this.amountTilesForBlast = (this.level + 1) <= 6 ? (this.level + 1) : 6;
+				this._view.facade({
+					"redrawCurentLevel": " "
+				});
+			} else if (key == "clickOnLevelButton") {
+				this.buildeLevel(object[key]._id);
             }
 		}
 	}
@@ -150,21 +165,27 @@ class Game {
 	}
 	checkEndGame() {
 		console.log("Start Model.checkEndGame()");
-		let canDoNextMove = false;
+		let canDoNextMove = true;
 		if (this.checkPossibleBlast(this.objectRegister.Field[0], this.amountTilesForBlast)) {
 			console.log("ALL OK CAN DO NEXT MOVE");
 			
 		} else {
-			console.warn("NO AVAILABLE FOR BLAST");
+			console.log("NO AVAILABLE FOR BLAST");
+			canDoNextMove = false;
 			for (let i = 0; i < this.amountMixing; i++) {
+				console.log("Mixing:"+i);
 				let copyField = this.copyField(this.objectRegister.Field[0]);
+				let newMatrix = copyField.mixTiles();
 				this._view.facade({
-					"mixTiles": copyField
+					"mixTiles": newMatrix
 				});
-				if (this.checkPossibleBlast(this.objectRegister.Field[0], this.amountTilesForBlast)) {
+				if (this.checkPossibleBlast(copyField, this.amountTilesForBlast)) {
+					console.log("Mixing:succes");
 					i = this.amountMixing;
 					canDoNextMove = true;
-                }
+                }else{
+					console.log("Mixing:NOT SUCCESS");
+				}
 			}
 
 		}
@@ -178,7 +199,7 @@ class Game {
 			this._view.facade({
 				"drawWin" : "Win"
 			});
-		} else if (this.moves <= 0 && !canDoNextMove) {
+		} else if (this.moves <= 0 || !canDoNextMove) {
 			console.log("--------LOSE--------");
 			this.amountTilesForBlast = 9999;
 			this._view.facade({
@@ -206,6 +227,10 @@ class Game {
 		this.objectRegister.Button.push(new NextButton("nextButton1"));
 		this.objectRegister.Button.push(new RepeatButton("repeatButton1"));
 		this.objectRegister.Button.push(new MenuButton("menuButton1"));
+		this.objectRegister.Button.push(new ContinueButton("continueButton1"));
+		for(let i=1; i<13; i++){
+			this.objectRegister.Button.push(new LevelButton(i));
+		}
 	}
 	getArrayTilesWithSameColor(tile) {
 		console.log("Start Controler.getArrayTilesWithSameColor()");
@@ -393,6 +418,7 @@ class Field extends Obj{
 				arrayTiles.push(this._matrixOfTiles[i][k]);
             }
 		}
+		/*---------------------------------------------
 		let j = 0;
 		for (let i = 0; i < this._matrixOfTiles.length; i++) {
 			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
@@ -403,6 +429,15 @@ class Field extends Obj{
 					index = j;
 				}
 				this._matrixOfTiles[i][k] = arrayTiles[index];
+				j++;
+			}
+		}
+		--------------------------------------------*/
+		shuffle(arrayTiles);
+		let j = 0;
+		for (let i = 0; i < this._matrixOfTiles.length; i++) {
+			for (let k = 0; k < this._matrixOfTiles[i].length; k++) {
+				this._matrixOfTiles[i][k] = arrayTiles[j];
 				j++;
 			}
 		}
@@ -473,6 +508,16 @@ class RepeatButton extends Button {
 }
 class MenuButton extends Button {
 	constructor(id) {
+		super(id);
+	}
+}
+class ContinueButton extends Button {
+	constructor(id){
+		super(id);
+	}
+}
+class LevelButton extends Button {
+	constructor(id){
 		super(id);
 	}
 }

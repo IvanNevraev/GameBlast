@@ -7,12 +7,11 @@ function main() {
 	//This is object with names of images
 	//Name of class : name of image
 	let nameOfImages = {
-		"amountOfFiles" : 12,
 		"puthToFiles" : "img/",
 		"Field" : ["Field.png"],
 		"Tile": ["BlueTile.png", "GreenTile.png", "PurpleTile.png", "RedTile.png", "YellowTile.png"],
 		"Button" : ["PauseButton.png","Button1.png"],
-		"Background" : ["Background.jpg"],
+		"Background" : ["Background.jpg", "Background1.jpg","Background2.jpg"],
 		"Progress" : ["BackgroundProgress.png"],
 		"PanelScope" : ["PanelScope.png"],
 		"Win" : ["Win.png"],

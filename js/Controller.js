@@ -58,6 +58,14 @@ class Controller {
             this._game.facade({
                 "clickOnNextButton": object
             });
+        } else if (object instanceof ContinueButton) {
+            this._game.facade({
+                "clickOnContinueButton": object
+            });
+        } else if (object instanceof LevelButton) {
+            this._game.facade({
+                "clickOnLevelButton": object
+            });
         }
     }
 }

@@ -23,6 +23,7 @@
 	loadResourses() {
 		this._loadPromise = new Promise((resolve, reject) => {
 			let flag = 0;
+			let flagOnload = 0;
 			for(let key in this._nameOfImages){
 				if(key!="puthToFiles"&&key!="amountOfFiles"){
 					this._images[key] = new Array();
@@ -30,12 +31,13 @@
 						let img = new Image();
 						img.src = this._nameOfImages.puthToFiles+this._nameOfImages[key][i];
 						img.onload = () => {
-							flag++;
-							if (flag == this._nameOfImages["amountOfFiles"]) {
+							flagOnload++;
+							if (flag == flagOnload) {
 								resolve("All images is downloaded. Amount:"+flag);
 							}
 						}
 						this._images[key].push(img);
+						flag++;
 					}
 				}
 			}
@@ -43,9 +45,13 @@
 	}
 	drawLevel() {
 		console.log("Start View.drawLevel()");
-		//Rest button parameters
+		//Reset button parameters
 		for (let item of this.objectRegister.Button) {
-			if (item instanceof MenuButton || item instanceof RepeatButton || item instanceof NextButton) {
+			let isForReset = true;
+			if(item instanceof PauseButton){
+				isForReset = false;
+			}
+			if (isForReset) {
 				this.drawButton(item, this._images.Button[1]);
             }
         }
@@ -131,6 +137,7 @@
 			console.log(resolve);
 			return new Promise((resolve, reject) => {
 				console.log("Start View.drawAllTiles()");
+				this.objectRegister.isControled = false;
 				for (let i = 0; i < tiles.length; i++) {
 					if (tiles[i] != null) {
 						setTimeout(() => {
@@ -138,6 +145,7 @@
 							kd++;
 							if (kd == k) {
 								resolve("Finish View.drawAllTiles()");
+								this.objectRegister.isControled = true;
 							}
 						}, delay * i);
 						k++;
@@ -169,6 +177,12 @@
 					this.drawLose();
 				} else if (key == "mixTiles") {
 					this.mixTiles(object[key]);
+				} else if (key == "drawPauseMenu") {
+					this.drawPauseMenu();
+				} else if (key == "redrawCurentLevel") {
+					this.redrawCurentLevel();
+				} else if (key == "drawLobby") {
+					this.drawLobby();
                 }
 			}
 		}, (reject) => { });
@@ -344,7 +358,7 @@
 		});
 		this._drawPromise = newPromise;
 	}
-	mixTiles(copyField) {
+	mixTiles(newMatrix) {
 		let k = 0;
 		let kd = 0;
 		let delay = 20;
@@ -354,7 +368,6 @@
 			return new Promise((resolve, reject) => {
 				console.log("Start View.mixTiles()");
 				this.objectRegister.isControled = false;
-				let newMatrix = copyField.mixTiles();
 				let array = new Array();
 				matrixToLineArray(newMatrix,array);
 				let tileForMix = new Array();
@@ -401,11 +414,10 @@
 						kd++;
 						if (kd == k) {
 							//Update parametrs to origin field
-							let originMatrix = this.objectRegister.Field[0].mixTiles();
+							let originMatrix = this.objectRegister.Field[0]._matrixOfTiles;
 							for (let i = 0; i < originMatrix.length; i++) {
 								for (let k = 0; k < originMatrix[i].length; k++) {
-									originMatrix[i][k].X = newMatrix[i][k].X;
-									originMatrix[i][k].Y = newMatrix[i][k].Y;
+									originMatrix[i][k]._color = newMatrix[i][k]._color;
                                 }
                             }
 							//----------------------------------
@@ -592,7 +604,7 @@
 		});
 		this._drawPromise = newPromise;
 	}
-	drawButton(object = null, img = null, x = 0, y = 0, width = 0, height = 0, text = "") {
+	drawButton(object = null, img = null, x = 0, y = 0, width = 0, height = 0, text = "", colorText = "white") {
 		object.X = x;
 		object.Y = y;
 		object.width = width;
@@ -604,7 +616,7 @@
 		let yT = y + height * 0.5;
 		let fontSizeT = height * 0.6;
 		this._ctxCanvas.font = fontSizeT + "px Comic Sans MS";
-		this._ctxCanvas.fillStyle = "white";
+		this._ctxCanvas.fillStyle = colorText;
 		this._ctxCanvas.textAlign = "center";
 		this._ctxCanvas.textBaseline = "middle";
 		this._ctxCanvas.fillText(text, xT, yT);
@@ -659,6 +671,142 @@
 		});
 		this._drawPromise = newPromise;
     }
+	drawPauseMenu(){
+		console.log("Start View.drawPauseMenu");
+		let widthWindow = document.documentElement.clientWidth;
+		let heightWindow = document.documentElement.clientHeight;
+		//Draw div
+		let imageDiv = this._images.Field[0];
+		let heightDiv;
+		let widthDiv;
+		let xDiv;
+		let yDiv;
+		if(widthWindow<=heightWindow){
+			widthDiv = widthWindow*0.5;
+			heightDiv = widthDiv/0.75;
+			xDiv = widthWindow*0.5 - widthDiv * 0.5;
+			yDiv = xDiv;
+		}else{
+			heightDiv = heightWindow * 0.8;
+			widthDiv = heightDiv * 0.75;
+			xDiv = widthWindow*0.5 - widthDiv * 0.5;
+			yDiv = heightWindow * 0.5 - heightDiv * 0.5;
+		}
+		this._ctxCanvas.drawImage(imageDiv,xDiv,yDiv,widthDiv,heightDiv);
+		//Set parameters buttons
+		let widthButtons = widthDiv*0.8;
+		let heightButtons = heightDiv*0.2;
+		let imgButtons = this._images.Button[1];
+		let xButtons = xDiv + widthDiv*0.5 - widthButtons*0.5;
+		//Set parametrs repeat button
+		let yRepeatButton = yDiv + heightDiv*0.5 - heightButtons*0.5;
+		//Set parameters continue button
+		let yContinueButton = yRepeatButton - heightButtons - heightDiv*0.05;
+		//Set parametrs menu button
+		let yMenuButton = yRepeatButton + heightButtons + heightDiv*0.05;
+		//Draw all buttons
+		for(let item of this.objectRegister.Button){
+			if(item instanceof RepeatButton){
+				this.drawButton(item,imgButtons,xButtons,yRepeatButton,widthButtons,heightButtons,"Повтор");
+			}else if(item instanceof MenuButton){
+				this.drawButton(item,imgButtons,xButtons,yMenuButton,widthButtons,heightButtons,"Меню");
+			}else if(item instanceof ContinueButton){
+				this.drawButton(item,imgButtons,xButtons,yContinueButton,widthButtons,heightButtons,"Продол...");
+			}
+		}
+	}
+	redrawCurentLevel(){
+		console.log("Start View.redrawCurrentLevel()");
+		//Reset button parameters
+		for (let item of this.objectRegister.Button) {
+			if (item instanceof MenuButton || item instanceof RepeatButton || item instanceof NextButton || item instanceof ContinueButton) {
+				this.drawButton(item, this._images.Button[1]);
+            }
+        }
+		//Draw new level
+		let addres = this.objectRegister.ParametersOfGame;
+		this.drawBackground();
+		this.drawPauseButton();
+		this.drawProgress(this.objectRegister.ParametersOfGame.progress);
+		this.drawPanelScope(addres.points, addres.moves, addres.level);
+		this.drawField(this.objectRegister.Field[0], 1);
+		let tiles = this.objectRegister.Tile;
+		for(let item of tiles){
+			this.drawTile(item);
+		}
+	}
+	drawLobby(){
+		console.log("Start View.drawLobby()");
+		//Reset not activity buttons
+		for (let item of this.objectRegister.Button) {
+			this.drawButton(item, this._images.Button[0]);
+        }
+		let widthWindow = document.documentElement.clientWidth;
+		let heightWindow = document.documentElement.clientHeight;
+		//Draw background
+		let imgBackground = this._images.Background[1];
+		this._ctxCanvas.drawImage(imgBackground,0,0,widthWindow,heightWindow);
+		//Set parametrs levelDiv
+		let widthLevelDiv;
+		let heightLevelDiv;
+		if(widthWindow<=heightWindow){
+			widthLevelDiv = widthWindow * 0.2;
+			heightLevelDiv = widthLevelDiv * 0.7;
+		}else{
+			heightLevelDiv = heightWindow * 0.2;
+			widthLevelDiv = heightLevelDiv/0.7;
+		}
+		let imgLevelDiv = this._images.Background[2];
+		let marginLevelDiv = widthWindow * 0.05;
+
+		if((widthLevelDiv*4+marginLevelDiv*5)>=widthWindow){
+			widthLevelDiv = widthWindow * 0.2;
+			heightLevelDiv = widthLevelDiv * 0.7;
+		}
+		
+		//Draw level div
+		let fontSize = heightLevelDiv*0.8;
+		this._ctxCanvas.font = fontSize+"px Comic Sans MS";
+		this._ctxCanvas.fillStyle = "#ffffff";
+		this._ctxCanvas.textAlign = "center";
+		this._ctxCanvas.textBaseline = "middle";
+		//-----------------------------------------
+		for(let i=0; i<3; i++){
+			let y;
+			if(widthWindow<=heightWindow){
+				y = widthWindow*0.05;
+			}else{
+				y = heightWindow*0.05;
+			}
+			y = y+(heightLevelDiv+marginLevelDiv)*i;
+			let yT = y + heightLevelDiv*0.55;
+			
+			let x2 = widthWindow*0.5 - widthLevelDiv - marginLevelDiv*0.5;
+			let level = 2+i*4;
+			this.drawButton(this.findeButtonById(level),imgLevelDiv,x2,y,widthLevelDiv,heightLevelDiv,level,"black");
+			//-----------------------------------------
+			let x1 = x2 - widthLevelDiv - marginLevelDiv;
+			level = 1 + i * 4;
+			this.drawButton(this.findeButtonById(level), imgLevelDiv, x1, y, widthLevelDiv, heightLevelDiv, level, "black");
+			//------------------------------------------
+			let x3 = widthWindow * 0.5 + marginLevelDiv * 0.5;
+			level = 3 + i * 4;
+			this.drawButton(this.findeButtonById(level), imgLevelDiv, x3, y, widthLevelDiv, heightLevelDiv, level, "black");
+			//--------------------------------------------------
+			let x4 = x3 + widthLevelDiv + marginLevelDiv;
+			level = 4 + i * 4;
+			this.drawButton(this.findeButtonById(level), imgLevelDiv, x4, y, widthLevelDiv, heightLevelDiv, level, "black");
+			this.objectRegister.isControled = true;
+		}
+	}
+	findeButtonById(id){
+		for(let item of this.objectRegister.Button){
+			if(item._id==id){
+				return item;
+			}
+		}
+		return null;
+	}
 	checkParameters() {
 		console.log("Start View.checkParameters()");
 		//This method checks if all drawn objects are in the general object registry.
