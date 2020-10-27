@@ -24,6 +24,11 @@
 		this._loadPromise = new Promise((resolve, reject) => {
 			let flag = 0;
 			let flagOnload = 0;
+			let heightWindow = document.documentElement.clientHeight;
+			let widthWindow = document.documentElement.clientWidth;
+			this._ctxCanvas.font = "30px Comic Sans MS";
+			this._ctxCanvas.textAlign = "center";
+			this._ctxCanvas.fillText("LOADING...", widthWindow * 0.5, heightWindow * 0.5 - 30);
 			for(let key in this._nameOfImages){
 				if(key!="puthToFiles"&&key!="amountOfFiles"){
 					this._images[key] = new Array();
@@ -32,6 +37,10 @@
 						img.src = this._nameOfImages.puthToFiles+this._nameOfImages[key][i];
 						img.onload = () => {
 							flagOnload++;
+							this._ctxCanvas.font = "30px Comic Sans MS";
+							this._ctxCanvas.textAlign = "center";
+							this._ctxCanvas.fillText("LOADING...", widthWindow * 0.5, heightWindow * 0.5 - 30);
+							this.drawProgressBar(10, heightWindow * 0.5 - 10, widthWindow, 20, flagOnload / flag * 100);
 							if (flag == flagOnload) {
 								resolve("All images is downloaded. Amount:"+flag);
 							}
@@ -410,6 +419,7 @@
 							let deltaX = (item.finishX - item.startX) / cadrs;
 							item.copyTile.Y = item.copyTile.Y + deltaY;
 							item.copyTile.X = item.copyTile.X + deltaX;
+							item.copyTile.img = this._images.Tile[item.copyTile._color];
 							this.drawImage(item.copyTile);
 						}
 						kd++;
@@ -482,6 +492,24 @@
 		let height = heightBackgroundProgress * 0.23;
 		let xBar = xBackgroundProgress + widthBackgroundProgress * 0.072;
 		let yBar = yBackgroundProgress + heightBackgroundProgress * 0.6;
+		let gr = this._ctxCanvas.createLinearGradient(xBar + (width / 2), yBar, xBar + (width / 2), yBar + height);
+		gr.addColorStop(0.0, '#b2ff74');
+		gr.addColorStop(0.5, '#069f00');
+		gr.addColorStop(0.7, '#069f00');
+		gr.addColorStop(1.0, '#b2ff74');
+		this._ctxCanvas.fillStyle = gr;
+		this._ctxCanvas.beginPath();
+		this._ctxCanvas.moveTo(xBar, yBar);
+		this._ctxCanvas.lineTo(xBar + width, yBar);
+		this._ctxCanvas.arc(xBar + width, yBar + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, false);
+		this._ctxCanvas.lineTo(xBar, yBar + height);
+		this._ctxCanvas.arc(xBar, yBar + (height / 2), height / 2, 3 * Math.PI / 2, Math.PI / 2, true);
+		this._ctxCanvas.closePath();
+		this._ctxCanvas.fill();
+	}
+	drawProgressBar(xBar, yBar, width, height, percent) {
+		//Draw progress bar
+		width = width * percent / 100;
 		let gr = this._ctxCanvas.createLinearGradient(xBar + (width / 2), yBar, xBar + (width / 2), yBar + height);
 		gr.addColorStop(0.0, '#b2ff74');
 		gr.addColorStop(0.5, '#069f00');
@@ -781,6 +809,7 @@
 		this.drawPauseButton();
 		this.drawProgress(this.objectRegister.ParametersOfGame.progress);
 		this.drawPanelScope(addres.points, addres.moves, addres.level);
+		this.drawBonusArea();
 		this.drawField(this.objectRegister.Field[0], 1);
 		let tiles = this.objectRegister.Tile;
 		for(let item of tiles){

@@ -10,12 +10,14 @@ class Game {
 	amountTilesForBlast = 2;
 	amountTilesInWidth = 5;
 	amountTilesInHeight = 5;
-	amountMixing = 2;
+	amountMixing = 1;
 	level = 0;    
 	points = 0;
 	goal = 0;    //level*1000
 	progress = 0; //Precent of goal level 0-100
 	moves = 0;     //Remaining moves 50-(level*2)
+	radiusBang = 1;
+	isBang = false;
 
 	constructor(view, objectRegister) {
 		this._view = view;
@@ -91,10 +93,15 @@ class Game {
 		//{"What will we do" : arrayOfChangetObjects}
 		for(let key in object){
 			if (key == "clickOnTile") {
-				let arrayTiles = this.getArrayTilesWithSameColor(object[key]);
-				if (arrayTiles.length >= this.amountTilesForBlast) {
-					this.blastTiles(arrayTiles);
-					this.countParametersOfLevel(arrayTiles);
+				if (this.isBang) {
+					//We will bang tiles
+					this.bangTiles(object[key], this.radiusBang);
+				} else {
+					let arrayTiles = this.getArrayTilesWithSameColor(object[key]);
+					if (arrayTiles.length >= this.amountTilesForBlast) {
+						this.blastTiles(arrayTiles);
+						this.countParametersOfLevel(arrayTiles);
+					}
 				}
 			} else if (key == "clickOnPauseButton") {
 				this.amountTilesForBlast = 9999999;
@@ -124,6 +131,8 @@ class Game {
 					this._view.facade({
 						"mixTiles": newMatrix
 					});
+				} else if (object[key]._id == "bang") {
+					this.isBang = true;
                 }
 			}
 		}
@@ -153,6 +162,37 @@ class Game {
 		this._view.facade({
 			"addTiles": this.objectRegister.Tile
 		});
+	}
+	bangTiles(tile, radius) {
+		console.log("Start Game.bangTiles()");
+		this.isBang = false;
+		//Get array tiles for bang
+		let arrayTilesForBang = this.getArrayTilesForBang(tile, radius);
+		
+		//Remove tiles from objectRegister
+		for (let i = 0; i < arrayTilesForBang.length; i++) {
+			let index = this.objectRegister.Tile.indexOf(arrayTilesForBang[i]);
+			this.objectRegister.Tile[index] = null;
+		}
+		//Remove tiles from field`s matrix
+		this.objectRegister.Field[0].deleteTiles(arrayTilesForBang);
+		this._view.facade({
+			"blastTiles": arrayTilesForBang
+		});
+		//Move tailes to vacant places
+		let matrix = this.objectRegister.Field[0].fallTiles();
+		let array = new Array();
+		matrixToLineArray(matrix, array);
+		this._view.facade({
+			"fallTiles": array,
+		});
+		//Add tailes for empty cell
+		matrix = this.objectRegister.Field[0].addTiles(this.amountWariablesColors)
+		matrixToLineArray(matrix, this.objectRegister.Tile);
+		this._view.facade({
+			"addTiles": this.objectRegister.Tile
+		});
+		this.countParametersOfLevel(arrayTilesForBang);
 	}
 	countParametersOfLevel(arrayTiles) {
 		//This method recount parameters of Level
@@ -280,6 +320,25 @@ class Game {
 		}
 
 		return arrayTiles;
+	}
+	getArrayTilesForBang(tile, radius) {
+		console.log("Start Model.getArrayTilesForBang()");
+		let arrayTilesForBang = new Array();
+		let matrixOfTiles = tile._field._matrixOfTiles;
+		for (let i = 0; i < matrixOfTiles.length; i++) {
+			for (let k = 0; k < matrixOfTiles[i].length; k++) {
+				let tileForBang = matrixOfTiles[i][k];
+				if (tileForBang == null) {
+					continue;
+				}
+				if (tileForBang.column <= tile.column + radius && tileForBang.column >= tile.column - radius) {
+					if (tileForBang.row <= tile.row + radius && tileForBang.row >= tile.row - radius) {
+						arrayTilesForBang.push(tileForBang);
+					}
+				}
+			}
+		}
+		return arrayTilesForBang;
 	}
 	copyField(field) {
 		let matrixOriginField = field._matrixOfTiles;
