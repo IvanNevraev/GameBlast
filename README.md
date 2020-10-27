@@ -56,7 +56,7 @@ In the constructor of the object, we call the method that starts loading the iso
 Also, this class has a saveState () method that saves the previous position of objects, because the Game class does not wait for rendering, but changes all parameters at once.
 Conventionally, the game has already been won or lost, while View is still drawing.
 When rendering, View sets the physical parameters of objects that are needed by the Controller
-In the meantime, there is no need to worry about it. ”
+
 Controller
 This class hangs an event handler on the DOM. In our case, this is only click. But also the Controller can detect any user actions.
 Because Rendering is done on canvas we don't have a standard HTML API to access the render object.
