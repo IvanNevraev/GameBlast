@@ -31,3 +31,35 @@ Controller проходит по каждому элементу из objectRegi
 Затем использую метод canvas isPointInPath проверяем попал ли click на объект.
 Затем Controller проверяет на какой объект нажал пользователь и отпровляет его на facade of Game.
 Это сделано опять же для минимизации зависимости, ведь controller не может на прямую менять параметры модели. 
+
+
+The game architecture framework is based on the MVC pattern.
+Model is represented by the file of the same name. The main logic of the game is not implemented.
+The main Game class creates and manages all game objects.
+The main mechanics of the game are based on the Tile and Field classes
+The field creates a matrix with a given size and fills it with objects with tiles with a given number of color options.
+The field 'can' remove the specified tiles from the matrix, move tiles down to empty spaces, fill empty cells with new tiles, mix tiles
+The Game class creates a field and calls up the necessary levels from it, builds the necessary game scene (menu, set level, pause, victory, defeat), calculates the parameters of the move (points, moves, progress),
+Makes a decision on winning or losing, shuffles tiles if necessary.
+The getArrayTilesForBlust () method should be described separately, which is passed from the clicked tile and collects all tiles with the same color.
+The field has a linkTiles () method that writes links to adjacent ones in the parameters of each tile and sets the isCounted value to false
+We call the getArrayTilesForBlustRec () method and pass it the first tile and an array where to add all the corresponding tiles.
+This method recursively calls itself for all adjacent tiles with the same color, and so on along the chain. When a new method is called, the isCounted flag is set to true to close the recursion
+Rendering
+After each stage of manipulation, Game sends the data for rendering to the View class, moreover, to the only facade method, by this we minimize the dependency between the classes.
+Game doesn't care how objects are drawn.
+View, depending on the type of request, calls a combination of its methods. Moreover, different elements of rendering are divided into microservices, which we combine depending on the current task.
+The two main features of this method are:
+1. When creating an object, we pass it an object with the specified resource names and path for loading.
+In the constructor of the object, we call the method that starts loading the isolations and create a Promise. Further, all drawing actions only after the completion of Promise
+2. When we call dynamic content rendering, we also create a chain from the Promise. This ensures that the animation sequence is correct.
+Also, this class has a saveState () method that saves the previous position of objects, because the Game class does not wait for rendering, but changes all parameters at once.
+Conventionally, the game has already been won or lost, while View is still drawing.
+When rendering, View sets the physical parameters of objects that are needed by the Controller
+In the meantime, there is no need to worry about it. ”
+Controller
+This class hangs an event handler on the DOM. In our case, this is only click. But also the Controller can detect any user actions.
+Because Rendering is done on canvas we don't have a standard HTML API to access the render object.
+Controller loops through each element from objectRegister and creates a Path2D object for it
+Then I use the canvas isPointInPath method to check if the click hit the object.
+This is done again to minimize dependence, because the controller cannot directly change the parameters of the model.
