@@ -5,21 +5,21 @@ class Game {
 	 objectRegister contains current active objects.
 	 */
 	_view;
-	objectRegister = {};
-	amountWariablesColors = 3;
-	amountTilesForBlast = 2;
-	amountTilesInWidth = 5;
-	amountTilesInHeight = 5;
-	amountMixing = 1;
-	level = 0;    
-	points = 0;
-	goal = 0;    //level*1000
-	progress = 0; //Precent of goal level 0-100
-	moves = 0;     //Remaining moves 50-(level*2)
-	radiusBang = 1;
-	isBang = false;
+	objectRegister;
+	amountWariablesColors;
+	amountTilesForBlast;
+	amountTilesInWidth;
+	amountTilesInHeight;
+	amountMixing;
+	level;    
+	points;
+	goal;    //level*1000
+	progress; //Precent of goal level 0-100
+	moves;     //Remaining moves 50-(level*2)
+	radiusBang;
+	isBang;
 
-	constructor(view, objectRegister) {
+	constructor(view, objectRegister = null) {
 		this._view = view;
 		this.objectRegister = objectRegister;
 		this.objectRegister.Field = new Array();
@@ -34,6 +34,18 @@ class Game {
 			"moves" : 0,
 			"level" : 0
 		};
+		this.amountWariablesColors = 3;
+		this.amountTilesForBlast = 2;
+		this.amountTilesInWidth = 5;
+		this.amountTilesInHeight = 5;
+		this.amountMixing = 1;
+		this.level = 0;
+		this.points = 0;
+		this.goal = 0;
+		this.progress = 0;
+		this.moves = 0;
+		this.radiusBang = 1;
+		this.isBang = false;
 		console.log(this);
 	}
 	buildeGame() {
@@ -366,14 +378,19 @@ class Game {
     }
 }
 class Obj {
-	width = 0;
-	height = 0;
-	X = 0;
-	Y = 0;
-	Z = 0;
-	img = null;
+	width;
+	height;
+	X;
+	Y;
+	Z;
+	img;
 	constructor() {
-
+		this.width = 0;
+		this.height = 0;
+		this.X = 0;
+		this.Y = 0;
+		this.Z = 0;
+		this.img = null;
     }
 }
 class Field extends Obj{ 
@@ -539,11 +556,11 @@ class Tile extends Obj{
 	_field;
 	row;
 	column;
-	leftTile = null;
-	upTile = null;
-	rightTile = null;
-	bottomTile = null;
-	isCounted = false;
+	leftTile;
+	upTile;
+	rightTile;
+	bottomTile;
+	isCounted;
 	constructor(id="unkown",color=0,field=null,row=0,column=0) {
 		super();
 		this._id = id;
@@ -551,6 +568,11 @@ class Tile extends Obj{
 		this._field = field;
 		this.row = row;
 		this.column = column;
+		this.leftTile = null;
+		this.upTile = null;
+		this.rightTile = null;
+		this.bottomTile = null;
+		this.isCounted = false;
 	}
 }
 class Button extends Obj {

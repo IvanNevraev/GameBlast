@@ -7,13 +7,15 @@
 	_loadPromise; //This promise ensures that all resources are loaded
 	_drawPromise; //this promise controls the render queue
 	_nameOfImages;
-	_images = {};
-	objectRegister = {};
-	preState = {};
+	_images;
+	objectRegister;
+	preState;
 	constructor(objectRegister, ctxCanvas, nameOfImages) {
 		this.objectRegister = objectRegister;
 		this._ctxCanvas = ctxCanvas;
 		this._nameOfImages = nameOfImages;
+		this._images = {};
+		this.preState = {};
 		this.loadResourses();
 		this._drawPromise = new Promise((resolve, reject) => {
 			resolve("This is first promise.");

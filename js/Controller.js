@@ -1,7 +1,7 @@
 class Controller {
     _game;
 	_ctxCanvas;
-    objectRegister = {};
+    objectRegister;
     constructor(game, objectRegister, ctxCanvas) {
         this._game = game;
         this.objectRegister = objectRegister;
